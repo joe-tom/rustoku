@@ -1,23 +1,48 @@
-#![feature(test)]
+use std::thread;
+use std::cmp;
 
-extern crate test;
-mod boob;
+mod board;
 
-use test::Bencher;
-fn main() {
+
+fn main () {
 
 }
 
-#[bench]
-fn bench_add_two(b: &mut Bencher) {
+fn minimax (board: board::Board,mut alpha: i32,mut beta: i32, depth: u32, you: bool) {
+  let val = board.evaluate();
+  if val == INF || val == N_INF || depth == 0 {
+    return val;
+  }
 
-  b.iter(||{
-    unsafe{
-      for i in 0..15 {
-        let n = test::black_box(1000);
-        let b = test::black_box(1000);
-        test::black_box(boob::EVAL[((boob::B_T[n as usize]) + (2 * boob::B_T[b as usize])) as usize]);
+  if you {
+    let mut v = N_INF;
+    let moves = board.get_moves(you);
+
+    for mov in &moves {
+      board.make_move(mov);
+      v = cmp::max(v, minimax(board, alpha, beta, depth - 1, !you));
+      board.undo_move(mov);
+      alpha = cmp::max(alpha, v);
+      if beta <= alpha {
+        break;
       }
     }
-  });
+
+    return v;
+  } else {
+    let mut v = INF;
+    let moves = board.get_moves(you);
+
+    for mov in &moves {
+      board.make_move(mov);
+      v = cmp::min(v, minimax(board, alpha, beta, depth - 1, !you));
+      board.undo_move(mov);
+      beta = cmp::min(beta, v);
+      if beta <= alpha {
+        break;
+      }
+    }
+
+    return v;
+  }
 }
