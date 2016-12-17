@@ -1,48 +1,78 @@
-use std::thread;
+#![feature(test)]
+
+extern crate test;
+use test::Bencher;
 use std::cmp;
+use std::vec;
 
 mod board;
 
-
-fn main () {
-
+fn main() {
+  board::location::build();
 }
 
-fn minimax (board: board::Board,mut alpha: i32,mut beta: i32, depth: u32, you: bool) {
-  let val = board.evaluate();
-  if val == INF || val == N_INF || depth == 0 {
-    return val;
+#[bench]
+fn bench_add_two(b: &mut Bencher) {
+  let nul = 16;
+  let BACH:[[u8;17];6] = [[0;17];6];
+  b.iter(||{
+    let i = test::black_box(3usize);
+    let win = test::black_box([1u8,2u8,3u8,4u8,5u8,nul,nul,nul]);
+    let mut c = win.iter();
+    c.next();
+    c.next();
+    unsafe{
+      let mut b: Vec<u8> = c.map(|s| BACH[i][*s as usize]).collect();
+      b.sort();
+      b.dedup();
+      b.retain(|s| *s != nul);
+    }
+  });
+}
+
+
+
+
+const INF: i16 = 100;
+const N_INF: i16 = -100;
+
+fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
+  let val = brd.evaluate();
+
+  if depth == 0 || val != 0{
+    return (board::location::NUL, val);
   }
 
+  let movs = brd.gen_movs();
   if you {
     let mut v = N_INF;
-    let moves = board.get_moves(you);
+    let mut mv = 0u8;
 
-    for mov in &moves {
-      board.make_move(mov);
-      v = cmp::max(v, minimax(board, alpha, beta, depth - 1, !you));
-      board.undo_move(mov);
-      alpha = cmp::max(alpha, v);
-      if beta <= alpha {
-        break;
+    for mov in &movs {
+      brd.make_mov(*mov, you);
+      let m = minmax(brd, depth - 1, !you);
+      if (m.1 > v) {
+        mv = m.0;
+        v = m.1;
       }
+      brd.undo_mov(*mov, you);
     }
 
-    return v;
+    return (mv, v);
   } else {
     let mut v = INF;
-    let moves = board.get_moves(you);
+    let mut mv = 0u8;
 
-    for mov in &moves {
-      board.make_move(mov);
-      v = cmp::min(v, minimax(board, alpha, beta, depth - 1, !you));
-      board.undo_move(mov);
-      beta = cmp::min(beta, v);
-      if beta <= alpha {
-        break;
+    for mov in &movs {
+      brd.make_mov(*mov, you);
+      let m = minmax(brd, depth - 1, !you);
+      if (m.1 < v) {
+        mv = m.0;
+        v = m.1;
       }
+      brd.undo_mov(*mov, you);
     }
 
-    return v;
+    return (mv, v);
   }
 }
