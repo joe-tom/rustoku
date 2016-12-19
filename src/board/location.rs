@@ -139,7 +139,7 @@ pub fn build () {
 
         // Create the WON table
         for i in 0..65535u32{
-            for m in 0..16 {
+            for m in 0..12 {
                 if (i&MASKS[m as usize]) == MASKS[m as usize] {
                     WON[i as usize] = 10;
                     break;
