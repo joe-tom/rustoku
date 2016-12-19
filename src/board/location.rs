@@ -1,5 +1,5 @@
-
-  /* FUNCTION FOR DIAGONAL MOVES */
+pub static mut WON: [i16; 65535] = [0; 65535];
+/* FUNCTION FOR DIAGONAL MOVES */
 pub const NUL: u8 = 240;
 
 pub static mut HORIZ_LOOKUP: [(u8,u8); 230] = [(NUL,0); 230];
@@ -98,6 +98,20 @@ pub static VERTI: [[u8; 15]; 15] = [
 
 
 
+pub const MASKS: [u32; 12] = [
+    0b0000000000011111,
+    0b0000000000111110,
+    0b0000000001111100,
+    0b0000000011111000,
+    0b0000000111110000,
+    0b0000001111100000,
+    0b0000011111000000,
+    0b0000111110000000,
+    0b0001111100000000,
+    0b0011111000000000,
+    0b0111110000000000,
+    0b1111100000000000
+];
 
 
 pub fn build () {
@@ -118,6 +132,17 @@ pub fn build () {
                 }
                 if DIAGL[r][c] != NUL {
                     DIAGL_LOOKUP[DIAGL[r][c] as usize] = (r as u8,c as u8);
+                }
+            }
+        }
+
+
+        // Create the WON table
+        for i in 0..65535u32{
+            for m in 0..16 {
+                if (i&MASKS[m as usize]) == MASKS[m as usize] {
+                    WON[i as usize] = 10;
+                    break;
                 }
             }
         }

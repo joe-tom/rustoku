@@ -7,20 +7,6 @@ pub static mut B_T: [u32; 14348907] = [0; 14348907];
 pub static mut MOV: [[[u8; 15]; 14348907]; 2] = [[[0; 15]; 14348907]; 2];
 
 
-const M_1: u16 = 0b0000000000011111;
-const M_2: u16 = 0b0000000000111110;
-const M_3: u16 = 0b0000000001111100;
-const M_4: u16 = 0b0000000011111000;
-const M_5: u16 = 0b0000000111110000;
-const M_6: u16 = 0b0000001111100000;
-const M_7: u16 = 0b0000011111000000;
-const M_8: u16 = 0b0000111110000000;
-const M_9: u16 = 0b0001111100000000;
-const M_10: u16 = 0b0011111000000000;
-const M_11: u16 = 0b0111110000000000;
-const M_12: u16 = 0b1111100000000000;
-
-
 pub struct Board {
   pub horiz_y: [u16; 15],
   pub horiz_o: [u16; 15],
@@ -36,29 +22,89 @@ pub struct Board {
 }
 
 impl Board {
-  pub fn gen_movs(&self, you: bool) -> Vec<u8> {
-    let movs = Vec::new();
-    if you {
-      let mut urgency = 0;
-      for i in 0..21usize {
-        if i < 15 {
-          let horiz_val = MOV[0][self.horiz_y[i] as usize];
-          let verti_val = MOV[0][self.horiz_y[i] as usize];
+  pub unsafe fn gen_movs(&self, you: bool) -> Vec<u8> {
+    let mut movs: Vec<u8> = Vec::new();
+    let mut urgency:u8 = 0;
+    let VAL = if you {&MOV[0usize]} else {&MOV[1usize]};
+   
+    for i in 0..21usize {
+      if i < 15 {
+        let mut horiz_val = VAL[self.horiz_o[i] as usize].iter();
+        let mut verti_val = VAL[self.horiz_o[i] as usize].iter();
+
+        let horiz_ur = *horiz_val.next().unwrap();
+        let verti_ur = *verti_val.next().unwrap();
+
+        if horiz_ur > urgency {
+          urgency = horiz_ur;
+          movs.truncate(0);
         }
-        let diagl_val = MOV[0][self.horiz_y[i] as usize];
-        let diagr_val = MOV[0][self.horiz_y[i] as usize];
-      }
-    } else {
-      let mut urgency = 0;
-      for i in 0..21usize {
-        if i < 15 {
-          let horiz_val = MOV[1][self.horiz_o[i] as usize];
-          let verti_val = MOV[1][self.horiz_o[i] as usize];
+        if horiz_ur == urgency {
+          let t_arr = &location::HORIZ[i];
+          let c = horiz_val.map(|s| t_arr[*s as usize]);
+          for i in c {
+            if i == 16 {
+              break;
+            }
+            movs.push(i);
+          }
         }
-        let diagl_val = MOV[1][self.horiz_o[i] as usize];
-        let diagr_val = MOV[1][self.horiz_o[i] as usize];
+        if verti_ur > urgency {
+          urgency = verti_ur;
+          movs.truncate(0);
+        }
+        if verti_ur == urgency {
+          let t_arr = &location::VERTI[i];
+          let c = verti_val.map(|s| t_arr[*s as usize]);
+          for i in c {
+            if i == 16 {
+              break;
+            }
+            movs.push(i);
+          }
+        }
       }
+
+      let mut diagl_val = VAL[self.diagr_o[i] as usize].iter();
+      let mut diagr_val = VAL[self.diagl_o[i] as usize].iter();
+
+      let diagl_ur = *diagl_val.next().unwrap();
+      let diagr_ur = *diagr_val.next().unwrap();
+
+      if diagr_ur > urgency {
+        urgency = diagr_ur;
+        movs.truncate(0);
+      }
+      if diagr_ur == urgency {
+        let t_arr = &location::DIAGR[i];
+        let c = diagr_val.map(|s| t_arr[*s as usize]);
+        for i in c {
+          if i == 16 {
+            break;
+          }
+          movs.push(i);
+        }
+      }
+      if diagl_ur > urgency {
+        urgency = diagl_ur;
+        movs.truncate(0);
+      }
+      if diagl_ur == urgency {
+        let t_arr = &location::DIAGL[i];
+        let c = diagl_val.map(|s| t_arr[*s as usize]);
+        for i in c {
+          if i == 16 {
+            break;
+          }
+          movs.push(i);
+        }
+      }
+
     }
+
+    // Get rid of the duplicates 
+    movs.sort();
+    movs.dedup();
 
     return movs;
   }
@@ -67,47 +113,16 @@ impl Board {
     unsafe {
       for i in 0..21usize {
         if i < 15 {
-          let h_y = self.horiz_y[i];
-          let h_o = self.horiz_o[i];
-
-          let v_y = self.verti_y[i];
-          let v_o = self.verti_o[i];
-
-          if h_o != 0 && (h_o & M_1 == M_1||h_o & M_2 == M_2||h_o & M_3 == M_3||h_o & M_4 == M_4||h_o & M_5 == M_5||h_o & M_6 == M_6||h_o & M_7 == M_7||h_o & M_8 == M_8||h_o & M_9 == M_9||h_o & M_10 == M_10||h_o & M_11 == M_11||h_o & M_12 == M_12){
-            return -100;
-          }
-          if h_y != 0 && (h_y & M_1 == M_1||h_y & M_2 == M_2||h_y & M_3 == M_3||h_y & M_4 == M_4||h_y & M_5 == M_5||h_y & M_6 == M_6||h_y & M_7 == M_7||h_y & M_8 == M_8||h_y & M_9 == M_9||h_y & M_10 == M_10||h_y & M_11 == M_11||h_y & M_12 == M_12){
-            return 100;
-          }
-
-          if v_o != 0 && (v_o & M_1 == M_1||v_o & M_2 == M_2||v_o & M_3 == M_3||v_o & M_4 == M_4||v_o & M_5 == M_5||v_o & M_6 == M_6||v_o & M_7 == M_7||v_o & M_8 == M_8||v_o & M_9 == M_9||v_o & M_10 == M_10||v_o & M_11 == M_11||v_o & M_12 == M_12){
-            return -100;
-          }
-          if v_y != 0 && (v_y & M_1 == M_1||v_y & M_2 == M_2||v_y & M_3 == M_3||v_y & M_4 == M_4||v_y & M_5 == M_5||v_y & M_6 == M_6||v_y & M_7 == M_7||v_y & M_8 == M_8||v_y & M_9 == M_9||v_y & M_10 == M_10||v_y & M_11 == M_11||v_y & M_12 == M_12){
-            return 100;
-          }
+          if location::WON[self.horiz_y[i] as usize] != 0 { return 100; }
+          if location::WON[self.horiz_o[i] as usize] != 0 { return -100; }
+          if location::WON[self.verti_y[i] as usize] != 0 { return 100; }
+          if location::WON[self.verti_o[i] as usize] != 0 { return -100; }
         }
 
-        let r_y = self.diagr_y[i];
-        let r_o = self.diagr_o[i];
-
-        let l_y = self.diagl_y[i];
-        let l_o = self.diagl_o[i];
-
-        if r_o != 0 && (r_o & M_1 == M_1||r_o & M_2 == M_2||r_o & M_3 == M_3||r_o & M_4 == M_4||r_o & M_5 == M_5||r_o & M_6 == M_6||r_o & M_7 == M_7||r_o & M_8 == M_8||r_o & M_9 == M_9||r_o & M_10 == M_10||r_o & M_11 == M_11||r_o & M_12 == M_12){
-            return -100;
-        }
-        if r_y != 0 && (r_y & M_1 == M_1||r_y & M_2 == M_2||r_y & M_3 == M_3||r_y & M_4 == M_4||r_y & M_5 == M_5||r_y & M_6 == M_6||r_y & M_7 == M_7||r_y & M_8 == M_8||r_y & M_9 == M_9||r_y & M_10 == M_10||r_y & M_11 == M_11||r_y & M_12 == M_12){
-          return 100;
-        }
-
-        if l_o != 0 && (l_o & M_1 == M_1||l_o & M_2 == M_2||l_o & M_3 == M_3||l_o & M_4 == M_4||l_o & M_5 == M_5||l_o & M_6 == M_6||l_o & M_7 == M_7||l_o & M_8 == M_8||l_o & M_9 == M_9||l_o & M_10 == M_10||l_o & M_11 == M_11||l_o & M_12 == M_12){
-            return -100;
-        }
-        if l_y != 0 && (l_y & M_1 == M_1||l_y & M_2 == M_2||l_y & M_3 == M_3||l_y & M_4 == M_4||l_y & M_5 == M_5||l_y & M_6 == M_6||l_y & M_7 == M_7||l_y & M_8 == M_8||l_y & M_9 == M_9||l_y & M_10 == M_10||l_y & M_11 == M_11||l_y & M_12 == M_12){
-          return 100;
-        }
-        
+        if location::WON[self.diagr_y[i] as usize] != 0 { return 100; }
+        if location::WON[self.diagr_o[i] as usize] != 0 { return -100; }
+        if location::WON[self.diagl_y[i] as usize] != 0 { return 100; }
+        if location::WON[self.diagl_o[i] as usize] != 0 { return -100; }
       }
     }
     return 0;

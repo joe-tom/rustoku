@@ -15,17 +15,25 @@ fn main() {
 fn bench_add_two(b: &mut Bencher) {
   let nul = 16;
   let BACH:[[u8;17];6] = [[0;17];6];
+
+  let mut brd = board::Board {
+    horiz_y: [0; 15],
+    horiz_o: [0; 15],
+    verti_y: [0; 15],
+    verti_o: [0; 15],
+    diagr_y: [0; 21],
+    diagr_o: [0; 21],
+    diagl_y: [0; 21],
+    diagl_o: [0; 21]
+  };
+
   b.iter(||{
-    let i = test::black_box(3usize);
-    let win = test::black_box([1u8,2u8,3u8,4u8,5u8,nul,nul,nul]);
-    let mut c = win.iter();
-    c.next();
-    c.next();
-    unsafe{
-      let mut b: Vec<u8> = c.map(|s| BACH[i][*s as usize]).collect();
-      b.sort();
-      b.dedup();
-      b.retain(|s| *s != nul);
+    let mut brd = test::black_box(&brd);
+    unsafe {
+      let a = brd.evaluate();
+      if a == 1231 {
+        println!("asdf");
+      }
     }
   });
 }
@@ -43,7 +51,8 @@ fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
     return (board::location::NUL, val);
   }
 
-  let movs = brd.gen_movs();
+  
+    let movs = unsafe {brd.gen_movs(you)};
   if you {
     let mut v = N_INF;
     let mut mv = 0u8;
