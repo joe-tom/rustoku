@@ -21,7 +21,16 @@ fn main() {
   };
 
   board::location::build();
-  minmax(&mut brd,4,true);
+
+  brd.make_mov(5, true);
+  brd.make_mov(6, true);
+  brd.make_mov(7, true);
+  brd.make_mov(8, true);
+  brd.make_mov(1, true);
+  brd.make_mov(0, true);
+
+  println!("{:?}", minmax(&mut brd, 10,true));
+
   unsafe{
 
   println!("{:?}", count);
@@ -72,7 +81,7 @@ fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
   
     let movs = unsafe {brd.gen_movs(you)};
   if you {
-    let mut v = N_INF;
+    let mut v = 0;
     let mut mv = 0u8;
 
     for mov in &movs {
@@ -86,7 +95,7 @@ fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
 
     return (mv, v);
   } else {
-    let mut v = INF;
+    let mut v = 0;
     let mut mv = 0u8;
 
     for mov in &movs {
