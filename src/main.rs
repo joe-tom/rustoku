@@ -26,10 +26,9 @@ fn main() {
   brd.make_mov(6, true);
   brd.make_mov(7, true);
   brd.make_mov(8, true);
-  brd.make_mov(1, true);
-  brd.make_mov(0, true);
+  //brd.make_mov(, true);
 
-  println!("{:?}", minmax(&mut brd, 10,true));
+  println!("{:?}", minmax(&mut brd, 1,true));
 
   unsafe{
 
@@ -98,7 +97,8 @@ fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
   }
 
   
-    let movs = unsafe {brd.gen_movs(you)};
+  let movs = unsafe {brd.gen_movs(you)};
+  println!("{:?}", movs);
   if you {
     let mut v = 0;
     let mut mv = 0u8;

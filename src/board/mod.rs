@@ -22,15 +22,16 @@ pub struct Board {
 
 impl Board {
   pub unsafe fn gen_movs(&self, you: bool) -> Vec<u8> {
-    let mut movs: Vec<u8> = Vec::new();
+    let mut movs: Vec<u8> = vec![location::NUL];
     let mut urgency:u8 = 0;
+
     let VAL = if you {&MOV[0usize]} else {&MOV[1usize]};
     let O_VAL = if !you {&MOV[0usize]} else {&MOV[1usize]};
    
     for i in 0..21usize {
       if i < 15 {
-        let mut horiz_val = VAL[self.horiz_o[i] as usize].iter();
-        let mut verti_val = VAL[self.horiz_o[i] as usize].iter();
+        let mut horiz_val = VAL[(B_T[self.horiz_y[i] as usize] + (2 * B_T[self.horiz_o[i] as usize])) as usize].iter();
+        let mut verti_val = VAL[(B_T[self.horiz_y[i] as usize] + (2 * B_T[self.horiz_o[i] as usize])) as usize].iter();
 
         let horiz_ur = *horiz_val.next().unwrap();
         let verti_ur = *verti_val.next().unwrap();
@@ -65,8 +66,8 @@ impl Board {
         }
       }
 
-      let mut diagl_val = VAL[self.diagr_o[i] as usize].iter();
-      let mut diagr_val = VAL[self.diagl_o[i] as usize].iter();
+      let mut diagl_val = VAL[(B_T[self.diagr_y[i] as usize] + (2 * B_T[self.diagr_o[i] as usize])) as usize].iter();
+      let mut diagr_val = VAL[(B_T[self.diagl_y[i] as usize] + (2 * B_T[self.diagl_o[i] as usize])) as usize].iter();
 
       let diagl_ur = *diagl_val.next().unwrap();
       let diagr_ur = *diagr_val.next().unwrap();
@@ -105,6 +106,7 @@ impl Board {
     // Get rid of the duplicates 
     movs.sort();
     movs.dedup();
+    movs.pop();
 
     return movs;
   }
