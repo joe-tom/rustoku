@@ -3,7 +3,7 @@ use std::vec;
 pub mod location;
 
 pub static mut B_T: [u32; 14348907] = [0; 14348907];
-pub static mut MOV: [[[u8; 15]; 14348907]; 2] = [[[0; 15]; 14348907]; 2];
+pub static mut MOV: &'static mut [[[u8; 15]; 14348907]; 2] = &mut [[[0u8; 15]; 14348907]; 2];
 
 
 pub struct Board {

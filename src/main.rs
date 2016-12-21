@@ -4,6 +4,11 @@ extern crate test;
 use test::Bencher;
 use std::cmp;
 use std::vec;
+use std::io::Error;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::SeekFrom;
+use std::mem;
 
 mod board;
 

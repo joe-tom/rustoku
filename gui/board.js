@@ -16,7 +16,7 @@ Board.activate = function (sq) {
   if (sq.active) return
   sq.active = true
   sq[(Board.$data.thinking?'white':'black')] = true 
-  Board.$data.thinking = !Board.$data.thinking 
+  Board.$data.thinking = !Board.$data.thinking
 }
 
 
