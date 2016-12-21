@@ -68,10 +68,10 @@ impl Board {
 
       let mut diagl_val = VAL[(B_T[self.diagr_y[i] as usize] + (2 * B_T[self.diagr_o[i] as usize])) as usize].iter();
       let mut diagr_val = VAL[(B_T[self.diagl_y[i] as usize] + (2 * B_T[self.diagl_o[i] as usize])) as usize].iter();
-
       let diagl_ur = *diagl_val.next().unwrap();
       let diagr_ur = *diagr_val.next().unwrap();
 
+      println!("{:?} {:?}", diagl_val,diagr_ur);
       if diagr_ur > urgency {
         urgency = diagr_ur;
         movs.truncate(0);
@@ -106,6 +106,7 @@ impl Board {
     // Get rid of the duplicates 
     movs.sort();
     movs.dedup();
+
     movs.pop();
 
     return movs;

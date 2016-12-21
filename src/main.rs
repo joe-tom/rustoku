@@ -22,13 +22,12 @@ fn main() {
 
   board::location::build();
 
-  brd.make_mov(5, true);
-  brd.make_mov(6, true);
-  brd.make_mov(7, true);
-  brd.make_mov(8, true);
-  //brd.make_mov(, true);
+  brd.make_mov(9, true);
+  brd.make_mov(25, true);
+  brd.make_mov(41, true);
+  brd.make_mov(57, true);
 
-  println!("{:?}", minmax(&mut brd, 1,true));
+  println!("{:?}", minmax(&mut brd, 2,true));
 
   unsafe{
 

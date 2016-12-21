@@ -176,8 +176,8 @@ unsafe fn eval(you: u32, opp: u32) {
     let state = (you_val + (2 * opp_val));
     
     // Let's build the movepart
-    let mut you_moves = vec![];
-    let mut opp_moves = vec![];
+    let mut you_moves = vec![0u8];
+    let mut opp_moves = vec![0u8];
 
     // Get rid of WON positions
     if WON[you as usize] != 0 || WON[opp as usize] != 0 {
@@ -269,14 +269,15 @@ unsafe fn eval(you: u32, opp: u32) {
         }
     }
 
+    you_moves[0] = you_max;
+    opp_moves[0] = opp_max;
 
     super::MOV[0][state as usize] = to_arr(you_moves);
     super::MOV[1][state as usize] = to_arr(opp_moves);
 }
 
 fn to_arr (moves: Vec<u8>) -> [u8; 15] {
-    let mut arr = [15u8 ; 15];
-
+    let mut arr = [0u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8, 15u8];
     for (i, mov) in moves.iter().enumerate() {
         unsafe {
             arr[i] = *mov;
