@@ -39,28 +39,47 @@ fn main() {
 
 #[bench]
 fn bench_add_two(b: &mut Bencher) {
-  let nul = 16;
-  let BACH:[[u8;17];6] = [[0;17];6];
+  // let nul = 16;
+  // let BACH:[[u8;17];6] = [[0;17];6];
 
-  let mut brd = board::Board {
-    horiz_y: [0; 15],
-    horiz_o: [0; 15],
-    verti_y: [0; 15],
-    verti_o: [0; 15],
-    diagr_y: [0; 21],
-    diagr_o: [0; 21],
-    diagl_y: [0; 21],
-    diagl_o: [0; 21]
-  };
+  // let mut brd = board::Board {
+  //   horiz_y: [0; 15],
+  //   horiz_o: [0; 15],
+  //   verti_y: [0; 15],
+  //   verti_o: [0; 15],
+  //   diagr_y: [0; 21],
+  //   diagr_o: [0; 21],
+  //   diagl_y: [0; 21],
+  //   diagl_o: [0; 21]
+  // };
 
   b.iter(||{
-    let mut brd = test::black_box(&brd);
-    unsafe {
-      let a = brd.evaluate();
-      if a == 1231 {
-        println!("asdf");
-      }
+
+    let mut a = test::black_box(12u8);
+    let mut b = test::black_box(13u8);
+
+    unsafe {/*
+      let c = board::location::WON[a as usize] + (2 * board::location::WON[b as usize]);
+      let d = board::location::WON[c as usize];
+      let e = test::black_box(&board::location::WON);
+      let mut f = e.iter();
+      f.next();
+      test::black_box(f);
+      test::black_box(d);*/
+      let a = test::black_box(7);
+      let d = 120312312123u32;
+      let e = (d-3u32.pow(a));
+      test::black_box(e);
     }
+    // let mut brd = test::black_box(&brd);
+    // unsafe {
+    //   let a = brd.evaluate();
+    //   if a == 1231 {
+    //     println!("asdf");
+    //   }
+    // }
+
+
   });
 }
 

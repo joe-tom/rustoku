@@ -146,5 +146,119 @@ pub fn build () {
                 }
             }
         }
+        // Create the Move table
+        move_recurse(0,0,15 + 1);
     }
+}
+
+
+
+pub fn move_recurse(you: u32, opp: u32, depth: u32) {
+    if depth == 0 {
+        unsafe{
+            eval(you, opp);
+        }
+    }
+    move_recurse(you | 1 << (depth - 1), opp , depth - 1);
+    move_recurse(you , opp | 1 << (depth - 1), depth - 1);
+    move_recurse(you , opp, depth - 1);
+}
+
+unsafe fn eval(you: u32, opp: u32) {
+    // Let's build the first part
+    let you_val = u32::from_str_radix(format!("{:b}", you), 3);
+    super::B_T[you as usize] = you_val;
+    let opp_val = u32::from_str_radix(format!("{:b}", opp), 3);
+    super::B_T[opp as usize] = opp_val;
+
+    // This is for the next array;
+    let state = (you_val + (2 * opp_val));
+    
+    // Let's build the movepart
+    let mut you_moves = [NUL; 15];
+    let mut opp_moves = [NUL; 15];
+
+    // Get rid of WON positions
+    if WON[you as usize] != 0 || WON[opp as usize] {
+        super::MOV[0][state] = you_move_arr;
+        super::MOV[1][state] = opp_move_arr;
+        return;
+    }
+
+    // First you:
+    let mut shift:u32 = 0;
+
+/*
+    THE SCANNING THING....
+ 
+    0b 0000000000[00000] i = 0
+    0b 000000000[00000]0 i = 1
+    0b 00000000[00000]00 i = 2
+    0b 0000000[00000]000 i = 3
+    0b 000000[00000]0000 i = 4
+    0b 00000[00000]00000 i = 5
+    0b 0000[00000]000000 i = 6
+    0b 000[00000]0000000 i = 7
+    0b 00[00000]00000000 i = 8
+    0b 0[00000]000000000 i = 9
+    0b [00000]0000000000 i = 10
+    0b 0000]00000000000 i = 11
+    0b 000]000000000000 i = 12
+    0b 00]0000000000000 i = 13
+    0b 0]00000000000000 i = 14
+
+*/
+
+
+    let mut you_max = 0;
+    let mut opp_max = 0;
+
+    for shift in 0..15 {
+        let you_state = (you >> shift) & 0b11111;
+        let opp_state = (opp >> shift) & 0b11111;
+
+        if opp_state == 0 {
+            match you_state {
+                0b01111 => {
+                    if you_max < 4 {
+                        you_max = 4;you_moves.truncate(0);you_moves.push(shift + 4);
+                        if shift + 4 >= 15 {you_moves.push(shift + 4);}
+                    }
+                    if you_max == 4 {if shift + 4 >= 15 { you_moves.push(shift + 4); }}
+                }
+                0b11110 => {
+                    if you_max < 4 {
+                        you_max = 4;you_moves.truncate(0);you_moves.push(shift);
+                        if shift >= 15 {you_moves.push(shift);}
+                    }
+                    if you_max == 4 {if shift >= 15 { you_moves.push(shift); }}
+                }
+                0b00111 => {
+                    if you_max < 3 {
+                        opp_max = 3;opp_moves.truncate(0);opp_moves.push(shift + 3);
+                        if shift + 3 >= 15 {opp_moves.push(shift + 3);}
+                    }
+                    if you_max == 3 {if shift + 3 >= 15 { opp_moves.push(shift + 3); }}
+                }
+                0b01110 => {
+                    if you_max < 3 {
+                        opp_max = 3;opp_moves.truncate(0);opp_moves.push(shift);
+                        if shift >= 15 {opp_moves.push(shift);}
+                    }
+                    if you_max == 3 {if shift >= 15 { opp_moves.push(shift); }}
+                }
+                0b00001 => {
+                    if you_max <= 1 {you_moves.push(shift);you_max = 1;}
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+    super::MOV[0][state] = you_move_arr;
+    super::MOV[1][state] = opp_move_arr;
 }

@@ -2,7 +2,6 @@ use std::vec;
 
 pub mod location;
 
-pub static mut WON: [u32; 14348907] = [0; 14348907];
 pub static mut B_T: [u32; 14348907] = [0; 14348907];
 pub static mut MOV: [[[u8; 15]; 14348907]; 2] = [[[0; 15]; 14348907]; 2];
 
@@ -26,6 +25,7 @@ impl Board {
     let mut movs: Vec<u8> = Vec::new();
     let mut urgency:u8 = 0;
     let VAL = if you {&MOV[0usize]} else {&MOV[1usize]};
+    let O_VAL = if !you {&MOV[0usize]} else {&MOV[1usize]};
    
     for i in 0..21usize {
       if i < 15 {
@@ -43,7 +43,7 @@ impl Board {
           let t_arr = &location::HORIZ[i];
           let c = horiz_val.map(|s| t_arr[*s as usize]);
           for i in c {
-            if i == 16 {
+            if i == location::NUL {
               break;
             }
             movs.push(i);
@@ -57,7 +57,7 @@ impl Board {
           let t_arr = &location::VERTI[i];
           let c = verti_val.map(|s| t_arr[*s as usize]);
           for i in c {
-            if i == 16 {
+            if i == location::NUL {
               break;
             }
             movs.push(i);
