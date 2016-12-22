@@ -3,8 +3,7 @@ use std::vec;
 pub mod location;
 
 pub static mut B_T: [u32; 14348907] = [0; 14348907];
-pub static mut MOV: [[u8; 15]; 32768] = [[16u8; 15]; 32768];
-
+pub static mut MOV: [[u8; 15]; 32768] = [[15u8; 15]; 32768];
 
 pub struct Board {
   pub horiz_y: [u16; 15],
@@ -22,35 +21,17 @@ pub struct Board {
 
 impl Board {
   pub unsafe fn gen_movs(&self, you: bool) -> Vec<u8> {
-    let mut movs_y: Vec<u8> = vec![location::NUL];
-    let mut movs_o: Vec<u8> = vec![location::NUL];
-
-    let mut urgency:u8 = 0;
-   
-    for i in 0..21usize {
-      if i < 15 {
-        let mut horiz_val_y = MOV[self.horiz_y[i]].iter(); 
-        let mut verti_val_y = MOV[self.horiz_y[i]].iter();
-
-        let mut horiz_val_o = MOV[self.horiz_o[i]].iter();
-        let mut verti_val_o = MOV[self.horiz_o[i]].iter();
-      }
-
-      let mut diagl_val_y = MOV[self.diagr_y[i]].iter(); 
-      let mut diagr_val_y = MOV[self.diagl_y[i]].iter(); 
-
-      let mut diagl_val_o = MOV[self.diagr_o[i]].iter();
-      let mut diagr_val_o = MOV[self.diagl_o[i]].iter(); 
+    let mut movs: Vec<u8> = vec![location::NUL];
+    
+    for i in 0..15usize { 
+        let mut horiz_val: Vec<u8> = MOV[(self.horiz_y[i] | self.horiz_o[i]) as usize].iter().map(|x| location::HORIZ[i][*x as usize]).collect(); 
+        movs.extend(horiz_val);
     }
 
     // Get rid of the duplicates 
-    movs_y.sort();
-    movs_y.dedup();
-
-    movs_o.sort();
-    movs_o.dedup();
-
-    movs_o.pop();
+    movs.sort();
+    movs.dedup();
+    movs.pop();
 
     return movs;
   }

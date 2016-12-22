@@ -161,7 +161,7 @@ pub fn build () {
             for m in 0..15{
                 if (state >> m) & 1  == 0 {
                     super::MOV[state as usize][counter] = m;
-                    counter++;
+                    counter += 1;
                 }
             }
         }
