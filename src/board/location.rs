@@ -5,7 +5,8 @@ use std::io::SeekFrom;
 use std::mem;
 
 pub static mut WON: [i16; 65536] = [0; 65536];
-pub static mut MOV_BUFF: [u8; 430467210] = [0; 430467210];
+pub static mut MOV_BUFF_0: [u8; 215233605] = [0; 215233605];
+pub static mut MOV_BUFF_1: [u8; 215233605] = [0; 215233605];
 
 /* FUNCTION FOR DIAGONAL MOVES */
 pub const NUL: u8 = 240;
@@ -159,25 +160,14 @@ pub fn build () {
 
         match ::File::open("MOVE_CACHE.dat") {
             Ok(val) => {
-                println!("COMMENT: Found cache file, loading that.");
-                unsafe {
-                    let mut a = val;
-                    a.read_exact(&mut MOV_BUFF);
-                    super::MOV = ::std::mem::transmute::<&mut [u8; 430467210],&mut [[[u8; 15]; 14348907]; 2]>(&mut MOV_BUFF);
-                }
                 println!("COMMENT: Done, generating binary table");
-                move_recurse(0,0,15, true);        
+                move_recurse(0,0,15, false);        
                 println!("COMMENT: Done, generating...");
             }
             Err(err) => {
                 println!("COMMENT: No cache file found... Generating...");
                 move_recurse(0,0,15, false);
                 println!("COMMENT: Done generating.. Storing...");
-                let mut file = ::File::create("MOVE_CACHE.dat").ok().unwrap();
-                unsafe {
-                    let bytes = ::std::mem::transmute::<&[[[u8; 15]; 14348907]; 2],&[u8; 430467210]>(&super::MOV);
-                    file.write(bytes);
-                }
             }
         }
     }
