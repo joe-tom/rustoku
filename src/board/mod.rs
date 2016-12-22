@@ -24,7 +24,8 @@ impl Board {
     let mut movs: Vec<u8> = vec![location::NUL];
     
     for i in 0..15usize { 
-        let mut horiz_val: Vec<u8> = MOV[(self.horiz_y[i] | self.horiz_o[i]) as usize].iter().map(|x| location::HORIZ[i][*x as usize]).collect(); 
+        let tree = location::HORIZ[i];
+        let mut horiz_val: Vec<u8> = MOV[(self.horiz_y[i] | self.horiz_o[i]) as usize].iter().map(|x| tree[*x as usize]).collect(); 
         movs.extend(horiz_val);
     }
 

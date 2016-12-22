@@ -160,7 +160,7 @@ pub fn build () {
             let mut counter = 0usize;
             for m in 0..15{
                 if (state >> m) & 1  == 0 {
-                    super::MOV[state as usize][counter] = m;
+                    super::MOV[state as usize][counter] = 14-m;
                     counter += 1;
                 }
             }
