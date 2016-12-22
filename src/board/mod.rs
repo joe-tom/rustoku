@@ -3,7 +3,7 @@ use std::vec;
 pub mod location;
 
 pub static mut B_T: [u32; 14348907] = [0; 14348907];
-pub static mut MOV: &'static mut [[[u8; 15]; 14348907]; 2] = &mut [[[0u8; 15]; 14348907]; 2];
+pub static mut MOV: [[u8; 15]; 32768] = [[16u8; 15]; 32768];
 
 
 pub struct Board {
@@ -22,92 +22,35 @@ pub struct Board {
 
 impl Board {
   pub unsafe fn gen_movs(&self, you: bool) -> Vec<u8> {
-    let mut movs: Vec<u8> = vec![location::NUL];
-    let mut urgency:u8 = 0;
+    let mut movs_y: Vec<u8> = vec![location::NUL];
+    let mut movs_o: Vec<u8> = vec![location::NUL];
 
-    let VAL = if you {&MOV[0usize]} else {&MOV[1usize]};
-    let O_VAL = if !you {&MOV[0usize]} else {&MOV[1usize]};
+    let mut urgency:u8 = 0;
    
     for i in 0..21usize {
       if i < 15 {
-        let mut horiz_val = VAL[(B_T[self.horiz_y[i] as usize] + (2 * B_T[self.horiz_o[i] as usize])) as usize].iter();
-        let mut verti_val = VAL[(B_T[self.horiz_y[i] as usize] + (2 * B_T[self.horiz_o[i] as usize])) as usize].iter();
+        let mut horiz_val_y = MOV[self.horiz_y[i]].iter(); 
+        let mut verti_val_y = MOV[self.horiz_y[i]].iter();
 
-        let horiz_ur = *horiz_val.next().unwrap();
-        let verti_ur = *verti_val.next().unwrap();
-
-        if horiz_ur > urgency {
-          urgency = horiz_ur;
-          movs.truncate(0);
-        }
-        if horiz_ur == urgency {
-          let t_arr = &location::HORIZ[i];
-          let c = horiz_val.map(|s| t_arr[*s as usize]);
-          for i in c {
-            if i == location::NUL {
-              break;
-            }
-            movs.push(i);
-          }
-        }
-        if verti_ur > urgency {
-          urgency = verti_ur;
-          movs.truncate(0);
-        }
-        if verti_ur == urgency {
-          let t_arr = &location::VERTI[i];
-          let c = verti_val.map(|s| t_arr[*s as usize]);
-          for i in c {
-            if i == location::NUL {
-              break;
-            }
-            movs.push(i);
-          }
-        }
+        let mut horiz_val_o = MOV[self.horiz_o[i]].iter();
+        let mut verti_val_o = MOV[self.horiz_o[i]].iter();
       }
 
-      let mut diagl_val = VAL[(B_T[self.diagr_y[i] as usize] + (2 * B_T[self.diagr_o[i] as usize])) as usize].iter();
-      let mut diagr_val = VAL[(B_T[self.diagl_y[i] as usize] + (2 * B_T[self.diagl_o[i] as usize])) as usize].iter();
-      let diagl_ur = *diagl_val.next().unwrap();
-      let diagr_ur = *diagr_val.next().unwrap();
+      let mut diagl_val_y = MOV[self.diagr_y[i]].iter(); 
+      let mut diagr_val_y = MOV[self.diagl_y[i]].iter(); 
 
-      println!("{:?} {:?}", diagl_val,diagr_ur);
-      if diagr_ur > urgency {
-        urgency = diagr_ur;
-        movs.truncate(0);
-      }
-      if diagr_ur == urgency {
-        let t_arr = &location::DIAGR[i];
-        let c = diagr_val.map(|s| t_arr[*s as usize]);
-        for i in c {
-          if i == 16 {
-            break;
-          }
-          movs.push(i);
-        }
-      }
-      if diagl_ur > urgency {
-        urgency = diagl_ur;
-        movs.truncate(0);
-      }
-      if diagl_ur == urgency {
-        let t_arr = &location::DIAGL[i];
-        let c = diagl_val.map(|s| t_arr[*s as usize]);
-        for i in c {
-          if i == 16 {
-            break;
-          }
-          movs.push(i);
-        }
-      }
-
+      let mut diagl_val_o = MOV[self.diagr_o[i]].iter();
+      let mut diagr_val_o = MOV[self.diagl_o[i]].iter(); 
     }
 
     // Get rid of the duplicates 
-    movs.sort();
-    movs.dedup();
+    movs_y.sort();
+    movs_y.dedup();
 
-    movs.pop();
+    movs_o.sort();
+    movs_o.dedup();
+
+    movs_o.pop();
 
     return movs;
   }

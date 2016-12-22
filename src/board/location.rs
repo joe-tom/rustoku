@@ -5,8 +5,6 @@ use std::io::SeekFrom;
 use std::mem;
 
 pub static mut WON: [i16; 65536] = [0; 65536];
-pub static mut MOV_BUFF_0: [u8; 215233605] = [0; 215233605];
-pub static mut MOV_BUFF_1: [u8; 215233605] = [0; 215233605];
 
 /* FUNCTION FOR DIAGONAL MOVES */
 pub const NUL: u8 = 240;
@@ -157,22 +155,33 @@ pub fn build () {
         }
 
         // Get the move table, or load it.
-
-        match ::File::open("MOVE_CACHE.dat") {
-            Ok(val) => {
-                println!("COMMENT: Done, generating binary table");
-                move_recurse(0,0,15, false);        
-                println!("COMMENT: Done, generating...");
-            }
-            Err(err) => {
-                println!("COMMENT: No cache file found... Generating...");
-                move_recurse(0,0,15, false);
-                println!("COMMENT: Done generating.. Storing...");
+        // Screw the move table for now.
+        for state in 0..32768u32{
+            let mut counter = 0usize;
+            for m in 0..15{
+                if (state >> m) & 1  == 0 {
+                    super::MOV[state as usize][counter] = m;
+                    counter++;
+                }
             }
         }
+
     }
 }
 
+/*
+match ::File::open("MOVE_CACHE.dat") {
+    Ok(val) => {
+        println!("COMMENT: Done, generating binary table");
+        move_recurse(0,0,15, false);        
+        println!("COMMENT: Done, generating...");
+    }
+    Err(err) => {
+        println!("COMMENT: No cache file found... Generating...");
+        move_recurse(0,0,15, false);
+        println!("COMMENT: Done generating.. Storing...");
+    }
+}
 
 
 pub fn move_recurse(you: u32, opp: u32, depth: u32, moveTable: bool) {
@@ -313,4 +322,4 @@ fn to_arr (moves: Vec<u8>) -> [u8; 15] {
     return arr;
 }
 
-
+*/
