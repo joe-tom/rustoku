@@ -32,7 +32,7 @@ fn main() {
   brd.make_mov(41, true);
   brd.make_mov(57, true);
 
-  println!("{:?}", minmax(&mut brd, 3, true));
+  println!("{:?}", minmax(&mut brd, 4, true));
 
   unsafe{
     println!("{:?}", count);
@@ -84,6 +84,7 @@ fn bench_add_two(b: &mut Bencher) {
 
 fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
   unsafe {count += 1;}
+
   let val = brd.evaluate();
 
   if depth == 0 || val != 0 {
@@ -120,5 +121,30 @@ fn minmax(brd: &mut board::Board, depth: u8, you: bool) -> (u8, i16) {
     }
 
     return (mv, -v);
+  }
+}
+
+
+
+
+#[test]
+fn testing_won() {
+  board::location::build();
+  let mut brd = board::Board {
+    horiz_y: [0; 15], horiz_o: [0; 15],
+    verti_y: [0; 15], verti_o: [0; 15],
+    diagr_y: [0; 21], diagr_o: [0; 21],
+    diagl_y: [0; 21], diagl_o: [0; 21]
+  }
+  
+  brd.make_mov(9, true);
+  brd.make_mov(25, true);
+  brd.make_mov(41, true);
+  brd.make_mov(57, true);
+
+  println!("{:?}", minmax(&mut brd, 4, true));
+
+  unsafe{
+    println!("{:?}", count);
   }
 }
