@@ -55,3 +55,99 @@ fn move_place() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * The actual minimax function
+ */
+
+fn minimax (brd: &mut board::Board, depth: u8, you: bool) -> i16 {
+  if depth == 0 {
+    if brd.won(!you) {
+      return if you {100} else {-100};
+    }
+
+    return 0;
+  }
+
+  if brd.won(!you) {
+    return if you {100} else {-100};
+  }
+
+  let movs = brd.gen_moves(you);
+  if you {  
+    let mut v = 0;
+    for mov in &movs {
+      brd.place_piece(*mov as usize, you);
+      let val = minimax(brd, depth - 1, !you);
+      brd.remove_piece(*mov as usize, you);
+      
+      if val > v {
+        v = val;
+        break;
+      }
+    }
+    return v;
+  } else {
+    let mut v = 0;
+    for mov in &movs {
+      brd.place_piece(*mov as usize, you);
+      let val = minimax(brd, depth - 1, !you);
+      brd.remove_piece(*mov as usize, you);
+      
+      if val > v {
+        v = val;
+        break;
+      }
+    }
+    return v;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
