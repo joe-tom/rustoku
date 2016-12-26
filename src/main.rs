@@ -6,6 +6,7 @@ use test::Bencher;
 
 mod board;
 mod build;
+mod input;
 
 
 
