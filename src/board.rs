@@ -2,7 +2,7 @@
 pub static mut BT: [u32; 65536] = [0; 65536];
 
 // The arrays for move lookup
-pub static mut MOVES: [[[i16; 30]; 14348907]; 2] = [[[0; 30]; 14348907]; 2];
+pub static mut MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
 
 // The array for win lookup
 pub static mut WON: [i8; 14348907] = [0; 14348907]; 
