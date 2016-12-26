@@ -10,12 +10,12 @@ mod input;
 
 fn main () {
   build::all();
-  unsafe { 
+/*  unsafe { 
     println!("000000111000 {:?}", board::MOVES[0][u32::from_str_radix("000000111000",3).unwrap() as usize]);
     println!("000000110100 {:?}", board::MOVES[0][u32::from_str_radix("000000110100",3).unwrap() as usize]);
     println!("000000111100 {:?}", board::MOVES[0][u32::from_str_radix("000000111100",3).unwrap() as usize]);
     println!("000000110000 {:?}", board::MOVES[0][u32::from_str_radix("000000110000",3).unwrap() as usize]);
-  }
+  }*/
 }
 
 #[bench]
@@ -44,13 +44,10 @@ fn gen_moves(b: &mut test::Bencher) {
 
 #[test]
 fn move_place() {
-  build::all();
-  unsafe { 
-    println!("000000111000 {:?}", board::MOVES[0][u32::from_str_radix("000000111000",3).unwrap() as usize]);
-    println!("000000110100 {:?}", board::MOVES[0][u32::from_str_radix("000000110100",3).unwrap() as usize]);
-    println!("000000111100 {:?}", board::MOVES[0][u32::from_str_radix("000000111100",3).unwrap() as usize]);
-    println!("000000110000 {:?}", board::MOVES[0][u32::from_str_radix("000000110000",3).unwrap() as usize]);
+  unsafe {
+    let c = std::mem::transmute::<&[[(u8,u8); 15]; 14348907], &[u8; 430467210]>(&board::MOVES);
   }
+
 }
 
 

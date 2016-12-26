@@ -1,13 +1,51 @@
+use std::boxed::Box;
+use std::fs::File;
+use std::io::Write;
+use std::io::Read;
+
+use std::mem;
+use std;
+
+static mut arr:[u8; 430467210] = [0; 430467210];
+
 pub fn all () {
   unsafe {
     // Build the BT Table.
-    println!("Building the Binary - Ternary Table");
+    println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
     for state in 0..65536{
       super::board::BT[state as usize] = u32::from_str_radix(&format!("{:b}", state),3).unwrap();
     }
 
     // Build the Move and WON Table.
-    binary_recurse(0,0,14);
+    // We might want to cache this.
+    match File::open("WON_TABLE_CACHE.bin") {
+      Ok(mut won_file) => {
+        println!("COMMENT: CACHES FOUND, READING WON CACHE");
+        let mut move_file = File::open("MOVE_TABLE_CACHE").ok().unwrap();
+        won_file.read(&mut super::board::WON);
+        println!("COMMENT: CACHES FOUND, READING MOVE CACHE");
+
+        unsafe {
+          let mut b = [0u8; 30];
+          move_file.read_exact(&mut b);
+          let c = std::mem::transmute::<[u8;30], [(u8,u8); 15]>(b);
+        }
+      }
+      Err(e) => {
+        println!("COMMENT: NO CACHE FOUND. GENERATING...");
+        binary_recurse(0,0,14);
+        println!("COMMENT: FINISHED GENERATING, WRITING FILES.");
+
+        let mut won_file = File::create("WON_TABLE_CACHE.bin").ok().unwrap();
+        let mut move_file = File::create("MOVE_TABLE_CACHE.bin").ok().unwrap();
+
+        won_file.write(&super::board::WON);
+        unsafe {
+          let c = std::mem::transmute::<&[[(u8,u8); 15]; 14348907], &[u8; 430467210]>(&super::board::MOVES);
+          move_file.write(c);
+        }
+      }
+    }
   }
 }
 
@@ -21,7 +59,7 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
   if depth < 0 {
     counter += 1;
     if counter % 100000 == 0{
-      println!("{:?}", ((counter as f32) / 14348907f32));
+      println!("COMMENT: {:?}", ((counter as f32) / 14348907f32));
     }
     let state: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
     build_state(you, opp, state as usize);

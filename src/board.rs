@@ -23,8 +23,8 @@ pub struct Board {
 
 
 
-pub static HORIZ: [(u8, u8); 225] = [
-  (0,  13),  (0, 13),  (0, 12),  (0, 11),  (0, 10),  (0, 9),  (0, 8),  (0, 7),  (0, 6),  (0, 5),  (0, 4),  (0, 3),  (0, 2),  (0, 1),  (0, 0),
+pub static HORIZ: [(usize, usize); 225] = [
+  (0,  14),  (0, 13),  (0, 12),  (0, 11),  (0, 10),  (0, 9),  (0, 8),  (0, 7),  (0, 6),  (0, 5),  (0, 4),  (0, 3),  (0, 2),  (0, 1),  (0, 0),
   (1,  14),  (1, 13),  (1, 12),  (1, 11),  (1, 10),  (1, 9),  (1, 8),  (1, 7),  (1, 6),  (1, 5),  (1, 4),  (1, 3),  (1, 2),  (1, 1),  (1, 0),
   (2,  14),  (2, 13),  (2, 12),  (2, 11),  (2, 10),  (2, 9),  (2, 8),  (2, 7),  (2, 6),  (2, 5),  (2, 4),  (2, 3),  (2, 2),  (2, 1),  (2, 0),
   (3,  14),  (3, 13),  (3, 12),  (3, 11),  (3, 10),  (3, 9),  (3, 8),  (3, 7),  (3, 6),  (3, 5),  (3, 4),  (3, 3),  (3, 2),  (3, 1),  (3, 0),
@@ -41,7 +41,7 @@ pub static HORIZ: [(u8, u8); 225] = [
   (14, 14), (14, 13), (14, 12), (14, 11), (14, 10), (14, 9), (14, 8), (14, 7), (14, 6), (14, 5), (14, 4), (14, 3), (14, 2), (14, 1), (14, 0)
 ];
 
-pub static VERTI: [(u8, u8); 225] = [
+pub static VERTI: [(usize, usize); 225] = [
  (0, 14), (1, 14), (2, 14), (3, 14), (4, 14), (5, 14), (6, 14), (7, 14), (8, 14), (9, 14), (10, 14), (11, 14), (12, 14), (13, 14), (14, 14),
  (0, 13), (1, 13), (2, 13), (3, 13), (4, 13), (5, 13), (6, 13), (7, 13), (8, 13), (9, 13), (10, 13), (11, 13), (12, 13), (13, 13), (14, 13),
  (0, 12), (1, 12), (2, 12), (3, 12), (4, 12), (5, 12), (6, 12), (7, 12), (8, 12), (9, 12), (10, 12), (11, 12), (12, 12), (13, 12), (14, 12),
@@ -120,36 +120,36 @@ impl Board {
 
   pub unsafe fn place_horiz_you (&mut self, place: usize) {
     let mov = HORIZ[place];
-    self.horiz_y[mov.0 as usize] |= (1 << mov.1); 
+    self.horiz_y[mov.0] |= (1 << mov.1); 
   }
   pub unsafe fn place_verti_you (&mut self, place: usize) {
     let mov = VERTI[place];
-    self.verti_y[mov.0 as usize] |= (1 << mov.1); 
+    self.verti_y[mov.0] |= (1 << mov.1); 
   }
   pub unsafe fn place_horiz_opp (&mut self, place: usize) {
     let mov = HORIZ[place];
-    self.horiz_o[mov.0 as usize] |= (1 << mov.1); 
+    self.horiz_o[mov.0] |= (1 << mov.1); 
   }
   pub unsafe fn place_verti_opp (&mut self, place: usize) {
     let mov = VERTI[place];
-    self.verti_o[mov.0 as usize] |= (1 << mov.1); 
+    self.verti_o[mov.0] |= (1 << mov.1); 
   }
 
   pub unsafe fn remove_horiz_you (&mut self, place: usize) {
     let mov = HORIZ[place];
-    self.horiz_y[mov.0 as usize] ^= (1 << mov.1); 
+    self.horiz_y[mov.0] ^= (1 << mov.1); 
   }
   pub unsafe fn remove_verti_you (&mut self, place: usize) {
     let mov = VERTI[place];
-    self.verti_y[mov.0 as usize] ^= (1 << mov.1); 
+    self.verti_y[mov.0] ^= (1 << mov.1); 
   }
   pub unsafe fn remove_horiz_opp (&mut self, place: usize) {
     let mov = HORIZ[place];
-    self.horiz_o[mov.0 as usize] ^= (1 << mov.1); 
+    self.horiz_o[mov.0] ^= (1 << mov.1); 
   }
   pub unsafe fn remove_verti_opp (&mut self, place: usize) {
     let mov = VERTI[place];
-    self.verti_o[mov.0 as usize] ^= (1 << mov.1); 
+    self.verti_o[mov.0] ^= (1 << mov.1); 
   }
 }
 
