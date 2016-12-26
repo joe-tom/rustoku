@@ -1,3 +1,4 @@
+#![feature(type_ascription)]
 #![feature(test)]
 
 extern crate test;
@@ -36,8 +37,7 @@ fn gen_moves(b: &mut test::Bencher) {
   b.iter(|| {
     let a = test::black_box(10);
     let b = test::black_box(false);
-    brd.place_piece(a,b);
-    brd.remove_piece(a,b);
+    test::black_box(brd.won(true));
   })
 }
 

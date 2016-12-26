@@ -5,7 +5,7 @@ pub static mut BT: [u32; 65536] = [0; 65536];
 pub static mut MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
 
 // The array for win lookup
-pub static mut WON: [i8; 14348907] = [0; 14348907]; 
+pub static mut WON: [u8; 65536] = [0; 65536]; 
 
 pub struct Board {
   pub multi: [[u8; 15]; 15],
@@ -60,15 +60,35 @@ pub static VERTI: [(u8, u8); 225] = [
 ];
 
 impl Board {
+  pub fn won (&self, you: bool) -> bool {
+    unsafe {
+      if you {
+        for i in 0..15usize {
+          if WON[self.verti_y[i] as usize] != 0 || WON[self.horiz_y[i] as usize] != 0 {
+            return true;
+          }
+        }
+      } else {
+        for i in 0..15usize {
+          if WON[self.verti_o[i] as usize] != 0 || WON[self.horiz_o[i] as usize] != 0 {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
   pub fn gen_moves (&self, you: bool) -> Vec<u8> {
     let mut movs:Vec<u8> = vec![];
     unsafe {
-      for i in 0..15 {
-        let v_state = (2 * BT[self.verti_y as usize]) + BT[self.verti_o as usize];
-        let h_state = (2 * BT[self.horiz_y as usize]) + BT[self.horiz_o as usize];
+      for i in 0..15usize {
+        let v_state = (2 * BT[self.verti_y[i] as usize]) + BT[self.verti_o[i] as usize];
+        let h_state = (2 * BT[self.horiz_y[i] as usize]) + BT[self.horiz_o[i] as usize];
 
-        movs.extend(&MOVES[v_state as usize].iter().map(|el| VERTI[el.0]));
-        movs.extend(&MOVES[h_state as usize].iter().map(|el| HORIZ[el.0]));
+        let v_movs: Vec<u8> = MOVES[v_state as usize].iter().map(|el| el.0).collect();
+        movs.extend(&v_movs);
+        let h_movs: Vec<u8> = MOVES[h_state as usize].iter().map(|el| el.0).collect();
+        movs.extend(&h_movs);
       }
     }
     return movs;

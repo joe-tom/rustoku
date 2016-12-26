@@ -5,7 +5,8 @@ pub fn all () {
     for state in 0..65536{
       super::board::BT[state as usize] = u32::from_str_radix(&format!("{:b}", state),3).unwrap();
     }
-    // Build the Move Table.
+
+    // Build the Move and WON Table.
     binary_recurse(0,0,14);
   }
 }
@@ -46,11 +47,10 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
       continue;
     }
     if you_state == 0b11111 {
-      super::board::WON[state] = 100;
+      super::board::WON[you as usize] = 100;
       return;
     }
     if opp_state == 0b11111 {
-      super::board::WON[state] = -100;
       return;
     }
 
