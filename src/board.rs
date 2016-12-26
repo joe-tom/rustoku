@@ -1,11 +1,11 @@
 // The array that allows binary to ternary conversion
-pub static BT: [u32; 65536] = [0; 65536];
+pub static mut BT: [u32; 65536] = [0; 65536];
 
 // The arrays for move lookup
-pub static MOVES: [[[u8; 15]; 14348907]; 2] = [[[(0, 0); 15]; 14348907]; 2];
+pub static mut MOVES: [[[i16; 30]; 14348907]; 2] = [[[0; 30]; 14348907]; 2];
 
 // The array for win lookup
-pub static WON: [u8; 14348907] = [0; 14348907]; 
+pub static mut WON: [i8; 14348907] = [0; 14348907]; 
 
 pub struct Board {
   pub multi: [[u8; 15]; 15],
@@ -19,43 +19,6 @@ pub struct Board {
   pub diagr_o: [u16; 19],
   pub diagl_y: [u16; 19],
   pub diagl_o: [u16; 19]
-}
-
-
-impl Board {
-  pub fn gen_moves (&self, you: bool) -> Vec<u8> {
-    unsafe {
-      
-    }
-  }
-
-  pub fn place_piece (&mut self, place: usize, you: bool) {
-    unsafe {
-      if you {
-        self.place_horiz_you(place);
-        self.place_verti_you(place);
-      } else {
-        self.place_horiz_opp(place);
-        self.place_verti_opp(place);
-      }
-    }
-  }
-  pub unsafe fn place_horiz_you (&mut self, place: usize) {
-    let mov = HORIZ[place];
-    self.horiz_y[mov.0 as usize] |= (1 << mov.1); 
-  }
-  pub unsafe fn place_verti_you (&mut self, place: usize) {
-    let mov = VERTI[place];
-    self.verti_y[mov.0 as usize] |= (1 << mov.1); 
-  }
-  pub unsafe fn place_horiz_opp (&mut self, place: usize) {
-    let mov = HORIZ[place];
-    self.horiz_o[mov.0 as usize] |= (1 << mov.1); 
-  }
-  pub unsafe fn place_verti_opp (&mut self, place: usize) {
-    let mov = VERTI[place];
-    self.verti_o[mov.0 as usize] |= (1 << mov.1); 
-  }
 }
 
 
@@ -95,3 +58,71 @@ pub static VERTI: [(u8, u8); 225] = [
  (0, 01), (1, 01), (2, 01), (3, 01), (4, 01), (5, 01), (6, 01), (7, 01), (8, 01), (9, 01), (10, 01), (11, 01), (12, 01), (13, 01), (14, 01),
  (0, 00), (1, 00), (2, 00), (3, 00), (4, 00), (5, 00), (6, 00), (7, 00), (8, 00), (9, 00), (10, 00), (11, 00), (12, 00), (13, 00), (14, 00),
 ];
+
+impl Board {
+  pub fn gen_moves (&self, you: bool) -> Vec<u8> {
+    unsafe {
+      
+    }
+    return vec![2]
+  }
+
+  pub fn place_piece (&mut self, place: usize, you: bool) {
+    unsafe {
+      if you {
+        self.place_horiz_you(place);
+        self.place_verti_you(place);
+      } else {
+        self.place_horiz_opp(place);
+        self.place_verti_opp(place);
+      }
+    }
+  }
+
+  pub fn remove_piece (&mut self, place: usize, you: bool) {
+    unsafe {
+      if you {
+        self.remove_horiz_you(place);
+        self.remove_verti_you(place);
+      } else {
+        self.remove_horiz_opp(place);
+        self.remove_verti_opp(place);
+      }
+    }
+  }
+
+  pub unsafe fn place_horiz_you (&mut self, place: usize) {
+    let mov = HORIZ[place];
+    self.horiz_y[mov.0 as usize] |= (1 << mov.1); 
+  }
+  pub unsafe fn place_verti_you (&mut self, place: usize) {
+    let mov = VERTI[place];
+    self.verti_y[mov.0 as usize] |= (1 << mov.1); 
+  }
+  pub unsafe fn place_horiz_opp (&mut self, place: usize) {
+    let mov = HORIZ[place];
+    self.horiz_o[mov.0 as usize] |= (1 << mov.1); 
+  }
+  pub unsafe fn place_verti_opp (&mut self, place: usize) {
+    let mov = VERTI[place];
+    self.verti_o[mov.0 as usize] |= (1 << mov.1); 
+  }
+
+  pub unsafe fn remove_horiz_you (&mut self, place: usize) {
+    let mov = HORIZ[place];
+    self.horiz_y[mov.0 as usize] ^= (1 << mov.1); 
+  }
+  pub unsafe fn remove_verti_you (&mut self, place: usize) {
+    let mov = VERTI[place];
+    self.verti_y[mov.0 as usize] ^= (1 << mov.1); 
+  }
+  pub unsafe fn remove_horiz_opp (&mut self, place: usize) {
+    let mov = HORIZ[place];
+    self.horiz_o[mov.0 as usize] ^= (1 << mov.1); 
+  }
+  pub unsafe fn remove_verti_opp (&mut self, place: usize) {
+    let mov = VERTI[place];
+    self.verti_o[mov.0 as usize] ^= (1 << mov.1); 
+  }
+}
+

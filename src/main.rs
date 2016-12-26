@@ -1,5 +1,4 @@
 #![feature(test)]
-#![feature(type_ascription)]
 
 extern crate test;
 use test::Bencher;
@@ -8,11 +7,18 @@ mod board;
 mod build;
 mod input;
 
-
+fn main () {
+  build::all();
+  unsafe { 
+    println!("000000111000 {:?}", board::MOVES[0][u32::from_str_radix("000000111000",3).unwrap() as usize]);
+    println!("000000110100 {:?}", board::MOVES[0][u32::from_str_radix("000000110100",3).unwrap() as usize]);
+    println!("000000111100 {:?}", board::MOVES[0][u32::from_str_radix("000000111100",3).unwrap() as usize]);
+    println!("000000110000 {:?}", board::MOVES[0][u32::from_str_radix("000000110000",3).unwrap() as usize]);
+  }
+}
 
 #[bench]
 fn gen_moves(b: &mut test::Bencher) {
-  build::all();
   
   let mut brd = board::Board {
     multi: [[0; 15]; 15],
@@ -31,5 +37,21 @@ fn gen_moves(b: &mut test::Bencher) {
     let a = test::black_box(10);
     let b = test::black_box(false);
     brd.place_piece(a,b);
+    brd.remove_piece(a,b);
   })
 }
+
+
+#[test]
+fn move_place() {
+  build::all();
+  unsafe { 
+    println!("000000111000 {:?}", board::MOVES[0][u32::from_str_radix("000000111000",3).unwrap() as usize]);
+    println!("000000110100 {:?}", board::MOVES[0][u32::from_str_radix("000000110100",3).unwrap() as usize]);
+    println!("000000111100 {:?}", board::MOVES[0][u32::from_str_radix("000000111100",3).unwrap() as usize]);
+    println!("000000110000 {:?}", board::MOVES[0][u32::from_str_radix("000000110000",3).unwrap() as usize]);
+  }
+}
+
+
+
