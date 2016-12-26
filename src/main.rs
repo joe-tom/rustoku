@@ -5,11 +5,14 @@ extern crate test;
 use test::Bencher;
 
 mod board;
+mod build;
 
 
 
 #[bench]
 fn gen_moves(b: &mut test::Bencher) {
+  build::all();
+  
   let mut brd = board::Board {
     multi: [[0; 15]; 15],
     
@@ -22,7 +25,7 @@ fn gen_moves(b: &mut test::Bencher) {
     diagl_y: [0; 19],
     diagl_o: [0; 19]
   };
-  
+
   b.iter(|| {
     let a = test::black_box(10);
     let b = test::black_box(false);
