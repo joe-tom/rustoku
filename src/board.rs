@@ -61,10 +61,17 @@ pub static VERTI: [(u8, u8); 225] = [
 
 impl Board {
   pub fn gen_moves (&self, you: bool) -> Vec<u8> {
+    let mut movs:Vec<u8> = vec![];
     unsafe {
-      
+      for i in 0..15 {
+        let v_state = (2 * BT[self.verti_y as usize]) + BT[self.verti_o as usize];
+        let h_state = (2 * BT[self.horiz_y as usize]) + BT[self.horiz_o as usize];
+
+        movs.extend(&MOVES[v_state as usize].iter().map(|el| VERTI[el.0]));
+        movs.extend(&MOVES[h_state as usize].iter().map(|el| HORIZ[el.0]));
+      }
     }
-    return vec![2]
+    return movs;
   }
 
   pub fn place_piece (&mut self, place: usize, you: bool) {
