@@ -4,23 +4,13 @@
 extern crate test;
 use test::Bencher;
 
+
 mod board;
 mod build;
 mod input;
 
 fn main () {
   build::all();
-/*  unsafe { 
-    println!("000000111000 {:?}", board::MOVES[0][u32::from_str_radix("000000111000",3).unwrap() as usize]);
-    println!("000000110100 {:?}", board::MOVES[0][u32::from_str_radix("000000110100",3).unwrap() as usize]);
-    println!("000000111100 {:?}", board::MOVES[0][u32::from_str_radix("000000111100",3).unwrap() as usize]);
-    println!("000000110000 {:?}", board::MOVES[0][u32::from_str_radix("000000110000",3).unwrap() as usize]);
-  }*/
-}
-
-#[bench]
-fn gen_moves(b: &mut test::Bencher) {
-  
   let mut brd = board::Board {
     multi: [[0; 15]; 15],
     
@@ -33,11 +23,47 @@ fn gen_moves(b: &mut test::Bencher) {
     diagl_y: [0; 19],
     diagl_o: [0; 19]
   };
+  brd.place_piece(10, true);
+  println!("{:?}", brd.gen_moves());
+  unsafe {
+    println!("000000111000 {:?}", board::MOVES[u32::from_str_radix("000000111000",3).unwrap() as usize]);
+    println!("000000110100 {:?}", board::MOVES[u32::from_str_radix("000000110100",3).unwrap() as usize]);
+    println!("000000111100 {:?}", board::MOVES[u32::from_str_radix("000000111100",3).unwrap() as usize]);
+    println!("000000110000 {:?}", board::MOVES[u32::from_str_radix("000000110000",3).unwrap() as usize]);
+  }
+}
+use std::collections::HashMap;
+use std::slice;
+use std::str;
 
-  b.iter(|| {
+
+#[bench]
+fn gen_moves(b: &mut test::Bencher) {
+  /*
+  let mut brd = board::Board {
+    multi: [[0; 15]; 15],
+    
+    horiz_y: [0; 15],
+    horiz_o: [0; 15],
+    verti_y: [0; 15],
+    verti_o: [0; 15],
+    diagr_y: [0; 19],
+    diagr_o: [0; 19],
+    diagl_y: [0; 19],
+    diagl_o: [0; 19]
+  };
+*/
+let mut books = HashMap::new();
+
+  b.iter(|| {/*
     let a = test::black_box(10);
     let b = test::black_box(false);
-    test::black_box(brd.won(true));
+    test::black_box(brd.won(true));*/
+    unsafe{
+      let mut a = test::black_box([12341u16,5245234u16,1234123u16]);
+      books.insert(a,31);
+      test::black_box(books.get(&a));
+    }
   })
 }
 
@@ -87,13 +113,13 @@ fn minimax (brd: &mut board::Board, depth: u8, you: bool) -> i16 {
     return if you {100} else {-100};
   }
 
-  let movs = brd.gen_moves(you);
+  let movs = brd.gen_moves();
   if you {  
     let mut v = 0;
     for mov in &movs {
-      brd.place_piece(*mov as usize, you);
+      brd.place_piece(mov.0 as usize, you);
       let val = minimax(brd, depth - 1, !you);
-      brd.remove_piece(*mov as usize, you);
+      brd.remove_piece(mov.0 as usize, you);
       
       if val > v {
         v = val;
@@ -104,9 +130,9 @@ fn minimax (brd: &mut board::Board, depth: u8, you: bool) -> i16 {
   } else {
     let mut v = 0;
     for mov in &movs {
-      brd.place_piece(*mov as usize, you);
+      brd.place_piece(mov.0 as usize, you);
       let val = minimax(brd, depth - 1, !you);
-      brd.remove_piece(*mov as usize, you);
+      brd.remove_piece(mov.0 as usize, you);
       
       if val > v {
         v = val;

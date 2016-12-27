@@ -2,14 +2,17 @@ use std::boxed::Box;
 use std::fs::File;
 use std::io::Write;
 use std::io::Read;
+use std::io::{self, BufReader};
+use std::io::prelude::*;
 
 use std::mem;
 use std;
 
-static mut arr:[u8; 430467210] = [0; 430467210];
 
+static mut tf:[u8; 430467210] = [0; 430467210];
 pub fn all () {
   unsafe {
+
     // Build the BT Table.
     println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
     for state in 0..65536{
@@ -18,17 +21,24 @@ pub fn all () {
 
     // Build the Move and WON Table.
     // We might want to cache this.
+    println!("COMMENT: NO CACHE FOUND. GENERATING...");
+    binary_recurse(0,0,14);
+    super::board::MOVES[0] = [(0,0);15];
+    /*
     match File::open("WON_TABLE_CACHE.bin") {
       Ok(mut won_file) => {
         println!("COMMENT: CACHES FOUND, READING WON CACHE");
-        let mut move_file = File::open("MOVE_TABLE_CACHE").ok().unwrap();
+        let mut move_file = File::open("MOVE_TABLE_CACHE.bin").ok().unwrap();
         won_file.read(&mut super::board::WON);
         println!("COMMENT: CACHES FOUND, READING MOVE CACHE");
 
         unsafe {
-          let mut b = [0u8; 30];
-          move_file.read_exact(&mut b);
-          let c = std::mem::transmute::<[u8;30], [(u8,u8); 15]>(b);
+          move_file.read(&mut tf);
+          let mut i = 0;
+          while i < 14348907 {
+            super::board::MOVES[i] = [(tf[i+0],tf[i+1]),(tf[i+2],tf[i+3]),(tf[i+4],tf[i+5]),(tf[i+6],tf[i+7]),(tf[i+8],tf[i+9]),(tf[i+10],tf[i+11]),(tf[i+12],tf[i+13]),(tf[i+14],tf[i+15]),(tf[i+16],tf[i+17]),(tf[i+18],tf[i+19]),(tf[i+20],tf[i+21]),(tf[i+22],tf[i+23]),(tf[i+24],tf[i+25]),(tf[i+26],tf[i+27]),(tf[28],tf[29])];
+            i += 30;
+          }
         }
       }
       Err(e) => {
@@ -36,16 +46,17 @@ pub fn all () {
         binary_recurse(0,0,14);
         println!("COMMENT: FINISHED GENERATING, WRITING FILES.");
 
-        let mut won_file = File::create("WON_TABLE_CACHE.bin").ok().unwrap();
+        //let mut won_file = File::create("WON_TABLE_CACHE.bin").ok().unwrap();
+        //won_file.write(&super::board::WON);
         let mut move_file = File::create("MOVE_TABLE_CACHE.bin").ok().unwrap();
 
-        won_file.write(&super::board::WON);
         unsafe {
           let c = std::mem::transmute::<&[[(u8,u8); 15]; 14348907], &[u8; 430467210]>(&super::board::MOVES);
           move_file.write(c);
         }
       }
     }
+    */
   }
 }
 
@@ -84,11 +95,8 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     if you_state == 0 && opp_state == 0 {
       continue;
     }
-    if you_state == 0b11111 {
+    if you_state == 0b11111 || opp_state == 0b11111 {
       super::board::WON[you as usize] = 100;
-      return;
-    }
-    if opp_state == 0b11111 {
       return;
     }
 
