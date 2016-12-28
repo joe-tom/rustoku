@@ -92,3 +92,103 @@ body{
     margin-top: 15px;
     color: #FFF;
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#gomoku__loading{
+  height: 100%;
+  width: 100%;
+  background-color: #6C7A89;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100000;
+  display: none;
+}
+  .loading__title{
+    font-family: Raleway;
+    font-size: 30px;
+    font-weight: 400;
+    color: #999;
+    width: 100%;
+    margin-top: 200px;
+    text-align: center;
+  }
+  .loading__subtitle{
+    font-family: Raleway;
+    font-size: 11px;
+    font-weight: 300;
+    text-align: center;
+    width: 100%;
+    color: #DDD;
+  }
+
+.loading__wheel{
+  width: 100%;
+  margin-top: 30px;
+}
+
+  .loading__status{
+    font-family: Raleway;
+    font-size: 10px;
+    font-weight: 300;
+    color: #FFF;
+    width: 100%;
+    text-align: center;
+    margin-top: 50px;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

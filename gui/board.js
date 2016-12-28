@@ -2,7 +2,8 @@ var Board = new Vue({
   el: '#gomoku',
   data: {
     squares: [],
-    thinking: false
+    thinking: false,
+    status: ''
   }
 })
 

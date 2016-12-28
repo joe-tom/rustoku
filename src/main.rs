@@ -23,7 +23,7 @@ fn main () {
     diagl_y: [0; 19],
     diagl_o: [0; 19]
   };
-  brd.place_piece(10, true);
+  brd.place_piece(84, true);
   println!("{:?}", brd.gen_moves());
   unsafe {
     println!("000000111000 {:?}", board::MOVES[u32::from_str_radix("000000111000",3).unwrap() as usize]);

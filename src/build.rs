@@ -70,7 +70,7 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
   if depth < 0 {
     counter += 1;
     if counter % 100000 == 0{
-      println!("COMMENT: {:?}", ((counter as f32) / 14348907f32));
+      println!("COMMENT: {:}% FINISHED", (((counter as f32) / 14348907f32) * 100f32).round());
     }
     let state: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
     build_state(you, opp, state as usize);
@@ -92,10 +92,11 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
   for shift in 0..11u16{
     let you_state = (you >> shift) & 0b11111;
     let opp_state = (opp >> shift) & 0b11111;
-    if you_state == 0 && opp_state == 0 {
+
+    if (you_state == 0) && (opp_state == 0) {
       continue;
     }
-    if you_state == 0b11111 || opp_state == 0b11111 {
+    if (you_state == 0b11111) || (opp_state == 0b11111) {
       super::board::WON[you as usize] = 100;
       return;
     }
@@ -147,7 +148,7 @@ fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
     }
   }
   
-  let value = (5 - (movs.len() as u8)) * 5;
+  let value = (5 - (movs.len() as u8));
   let mut mov_urg: Vec<(u8, u8)> = vec![];
 
   for mov in &movs {

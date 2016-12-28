@@ -6,8 +6,24 @@
     <link rel="stylesheet" href="./main.css">
     <link rel="stylesheet" href="./anim.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.0/vue.min.js"></script>
-  </head><body style="-webkit-app-region: drag">
+  </head>
+  <body style="-webkit-app-region: drag">
   <div id="gomoku">
+    <div id="gomoku__loading">
+      <div class="loading__title">JOMOKU</div>
+      <div class="loading__subtitle">my sick af gomoku game</div>
+      <div class="loading__wheel">
+        <div id="load">
+          <p></p><p></p><p></p><p></p><p></p><p></p>
+          <p></p><p></p><p></p><p></p><p></p><p></p>
+          <p></p><p></p><p></p><p></p><p></p><p></p>
+          <p></p><p></p><p></p><p></p><p></p><p></p>
+          <p></p><p></p><p></p><p></p><p></p><p></p>
+          <p></p><p></p><p></p><p></p><p></p><p></p>
+        </div>
+      </div>
+      <div class="loading__status">{{status}}</div>
+    </div>
     <div id="gomoku__title">JOMOKU</div>
     <div id="board">
       <div class="block" v-for="(square, index) in squares" @click="activate(square)">
@@ -33,6 +49,7 @@
     </div>
   </body>
   <script src="./board.js"></script>
+  <script src="./input.js"></script>
   <script>
     // You can also require other files to run in this process
     require('./renderer.js')
