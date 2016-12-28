@@ -42,14 +42,14 @@ fn gen_moves(b: &mut test::Bencher) {
   let mut brd = board::Board {
     multi: [[0; 15]; 15],
     
-    horiz_y: [0; 19],
-    horiz_o: [0; 19],
-    verti_y: [0; 19],
-    verti_o: [0; 19],
-    diagr_y: [0; 19],
-    diagr_o: [0; 19],
-    diagl_y: [0; 19],
-    diagl_o: [0; 19]
+    horiz_y: [0; 21],
+    horiz_o: [0; 21],
+    verti_y: [0; 21],
+    verti_o: [0; 21],
+    diagr_y: [0; 21],
+    diagr_o: [0; 21],
+    diagl_y: [0; 21],
+    diagl_o: [0; 21]
   };
 
   brd.place_piece(014,true);
@@ -87,14 +87,14 @@ fn less_moves(b: &mut test::Bencher) {
   let mut brd = board::Board {
     multi: [[0; 15]; 15],
     
-    horiz_y: [0; 19],
-    horiz_o: [0; 19],
-    verti_y: [0; 19],
-    verti_o: [0; 19],
-    diagr_y: [0; 19],
-    diagr_o: [0; 19],
-    diagl_y: [0; 19],
-    diagl_o: [0; 19]
+    horiz_y: [0; 21],
+    horiz_o: [0; 21],
+    verti_y: [0; 21],
+    verti_o: [0; 21],
+    diagr_y: [0; 21],
+    diagr_o: [0; 21],
+    diagl_y: [0; 21],
+    diagl_o: [0; 21]
   };
 
   b.iter(|| {

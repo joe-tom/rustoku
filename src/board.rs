@@ -10,15 +10,15 @@ pub static mut WON: [u8; 65536] = [0; 65536];
 pub struct Board {
   pub multi: [[u8; 15]; 15],
 
-  pub horiz_y: [u16; 19],
-  pub horiz_o: [u16; 19],
-  pub verti_y: [u16; 19],
-  pub verti_o: [u16; 19],
+  pub horiz_y: [u16; 21],
+  pub horiz_o: [u16; 21],
+  pub verti_y: [u16; 21],
+  pub verti_o: [u16; 21],
 
-  pub diagr_y: [u16; 19],
-  pub diagr_o: [u16; 19],
-  pub diagl_y: [u16; 19],
-  pub diagl_o: [u16; 19]
+  pub diagr_y: [u16; 21],
+  pub diagr_o: [u16; 21],
+  pub diagl_y: [u16; 21],
+  pub diagl_o: [u16; 21]
 }
 
 
@@ -117,27 +117,27 @@ pub static DIAGL: [(usize, usize); 225] = [
 ];
 
 pub static DIAGL_ARRS:[[u8; 15]; 21] = [
-  [060,046,032,018,004,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [075,061,047,033,019,005,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [090,076,062,048,034,020,006,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [105,091,077,063,049,035,021,007,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [120,106,092,078,064,050,036,022,008,NIL,NIL,NIL,NIL,NIL,NIL],
-  [135,121,107,093,079,065,051,037,023,009,NIL,NIL,NIL,NIL,NIL],
-  [150,136,122,108,094,080,066,052,038,024,010,NIL,NIL,NIL,NIL],
-  [165,151,137,123,109,095,081,067,053,039,025,011,NIL,NIL,NIL],
-  [180,166,152,138,124,110,096,082,068,054,040,026,012,NIL,NIL],
-  [195,181,167,153,139,125,111,097,083,069,055,041,027,013,NIL],
-  [210,196,182,168,154,140,126,112,098,084,070,056,042,028,014],
-  [211,197,183,169,155,141,127,113,099,085,071,057,043,029,NIL],
-  [212,198,184,170,156,142,128,114,100,086,072,058,044,NIL,NIL],
-  [213,199,185,171,157,143,129,115,101,087,073,059,NIL,NIL,NIL],
-  [214,200,186,172,158,144,130,116,102,088,074,NIL,NIL,NIL,NIL],
-  [215,201,187,173,159,145,131,117,103,089,NIL,NIL,NIL,NIL,NIL],
-  [216,202,188,174,160,146,132,118,104,NIL,NIL,NIL,NIL,NIL,NIL],
-  [217,203,189,175,161,147,133,119,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [218,204,190,176,162,148,134,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [219,205,191,177,163,149,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
-  [220,206,192,178,164,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL]
+  [004,018,032,046,060,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [005,019,033,047,061,075,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [006,020,034,048,062,076,090,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [007,021,035,049,063,077,091,105,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [008,022,036,050,064,078,092,106,120,NIL,NIL,NIL,NIL,NIL,NIL],
+  [009,023,037,051,065,079,093,107,121,135,NIL,NIL,NIL,NIL,NIL],
+  [010,024,038,052,066,080,094,108,122,136,150,NIL,NIL,NIL,NIL],
+  [011,025,039,053,067,081,095,109,123,137,151,165,NIL,NIL,NIL],
+  [012,026,040,054,068,082,096,110,124,138,152,166,180,NIL,NIL],
+  [013,027,041,055,069,083,097,111,125,139,153,167,181,195,NIL],
+  [014,028,042,056,070,084,098,112,126,140,154,168,182,196,210],
+  [029,043,057,071,085,099,113,127,141,155,169,183,197,211,NIL],
+  [044,058,072,086,100,114,128,142,156,170,184,198,212,NIL,NIL],
+  [059,073,087,101,115,129,143,157,171,185,199,213,NIL,NIL,NIL],
+  [074,088,102,116,130,144,158,172,186,200,214,NIL,NIL,NIL,NIL],
+  [089,103,117,131,145,159,173,187,201,215,NIL,NIL,NIL,NIL,NIL],
+  [104,118,132,146,160,174,188,202,216,NIL,NIL,NIL,NIL,NIL,NIL],
+  [119,133,147,161,175,189,203,217,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [134,148,162,176,190,204,218,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [149,163,177,191,205,219,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [164,178,192,206,220,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
 ];
 
 pub static DIAGR_ARRS:[[u8; 15]; 21] = [
@@ -188,7 +188,7 @@ impl Board {
     unsafe {
       let mut i = 0usize;
       loop {
-        if i >= 19{
+        if i >= 21{
           break;
         }
 
@@ -237,7 +237,7 @@ impl Board {
                   if mov.1 == 0 {
                     if !v_done && !h_done {break;} l_done = false;
                   } else {
-                    let a = DIAGL_ARRS[i][14usize - mov.0 as usize];
+                    let a = DIAGL_ARRS[i][mov.0 as usize];
                     if a != NIL {
                       movs.push((a, mov.1));
                     }
@@ -249,6 +249,7 @@ impl Board {
               }
             }
           }
+          println!("YO");
         } else {
           println!("HERE");
           match l_state.next() {
@@ -256,7 +257,7 @@ impl Board {
               if mov.1 == 0 {
                 break;
               } else {
-                let a = DIAGL_ARRS[i][14usize - mov.0 as usize];
+                let a = DIAGL_ARRS[i][mov.0 as usize];
                 if a != NIL {
                   movs.push((a, mov.1));
                 }
@@ -279,7 +280,8 @@ impl Board {
     let mut real_movs: Vec<(u8, u8)> = vec![];
     let mut first = false;
     let mut cur_mov = (15,15);
-
+    movs.sort_by(|a,b| (a.0).cmp(&b.0));
+    println!("{:?}", movs.len());
     for mov in &movs {
       if mov.0 == NIL {
         continue;

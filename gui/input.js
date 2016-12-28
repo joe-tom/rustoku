@@ -2,6 +2,9 @@
 var spawn = require('child_process').spawn;
 var engine = spawn('../target/debug/sandbox.exe')
 
+engine.stderr.on('data', function (data) {
+  console.log(data + '')
+})
 engine.stdout.on('data', function (data) {
   data += ''
   data.split('\n').filter(i => i).forEach(parse)
@@ -11,6 +14,7 @@ engine.stdout.on('data', function (data) {
 function parse(data) { 
   var things = data.split(':');
   if (things.length < 2) {
+    console.log(data)
     return
   }
 

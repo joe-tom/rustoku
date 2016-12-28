@@ -12,14 +12,14 @@ pub fn parse_board (board: String) -> super::board::Board{
   let mut B = super::board::Board{
     multi: [[0; 15]; 15],
 
-    horiz_y: [0; 19],
-    horiz_o: [0; 19],
-    verti_y: [0; 19],
-    verti_o: [0; 19],
-    diagr_y: [0; 19],
-    diagr_o: [0; 19],
-    diagl_y: [0; 19],
-    diagl_o: [0; 19]
+    horiz_y: [0; 21],
+    horiz_o: [0; 21],
+    verti_y: [0; 21],
+    verti_o: [0; 21],
+    diagr_y: [0; 21],
+    diagr_o: [0; 21],
+    diagl_y: [0; 21],
+    diagl_o: [0; 21]
   };
 
   let mut i = 0;
