@@ -37,31 +37,69 @@ use std::str;
 
 #[bench]
 fn gen_moves(b: &mut test::Bencher) {
-  /*
+  build::all();
+
   let mut brd = board::Board {
     multi: [[0; 15]; 15],
     
-    horiz_y: [0; 15],
-    horiz_o: [0; 15],
-    verti_y: [0; 15],
-    verti_o: [0; 15],
+    horiz_y: [0; 19],
+    horiz_o: [0; 19],
+    verti_y: [0; 19],
+    verti_o: [0; 19],
     diagr_y: [0; 19],
     diagr_o: [0; 19],
     diagl_y: [0; 19],
     diagl_o: [0; 19]
   };
-*/
-let mut books = HashMap::new();
 
-  b.iter(|| {/*
+  brd.place_piece(014,true);
+  brd.place_piece(028,true);
+  brd.place_piece(042,true);
+  brd.place_piece(056,true);
+  brd.place_piece(070,true);
+  brd.place_piece(084,true);
+  brd.place_piece(154,true);
+  brd.place_piece(168,true);
+  brd.place_piece(182,true);
+  brd.place_piece(196,true);
+  brd.place_piece(210,true);
+//let mut books = HashMap::new();
+
+  b.iter(|| {
+    let mut bord = test::black_box(&brd);
+    bord.gen_moves();
+  /*
     let a = test::black_box(10);
     let b = test::black_box(false);
-    test::black_box(brd.won(true));*/
+    test::black_box(brd.won(true));
     unsafe{
       let mut a = test::black_box([12341u16,5245234u16,1234123u16]);
       books.insert(a,31);
       test::black_box(books.get(&a));
-    }
+    }*/
+  })
+}
+
+#[bench]
+fn less_moves(b: &mut test::Bencher) {
+  build::all();
+
+  let mut brd = board::Board {
+    multi: [[0; 15]; 15],
+    
+    horiz_y: [0; 19],
+    horiz_o: [0; 19],
+    verti_y: [0; 19],
+    verti_o: [0; 19],
+    diagr_y: [0; 19],
+    diagr_o: [0; 19],
+    diagl_y: [0; 19],
+    diagl_o: [0; 19]
+  };
+
+  b.iter(|| {
+    let mut bord = test::black_box(&brd);
+    bord.gen_moves();
   })
 }
 

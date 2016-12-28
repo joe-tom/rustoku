@@ -9,7 +9,7 @@
   </head>
   <body style="-webkit-app-region: drag">
   <div id="gomoku">
-    <div id="gomoku__loading">
+    <div id="gomoku__loading" v-show="!ready">
       <div class="loading__title">JOMOKU</div>
       <div class="loading__subtitle">my sick af gomoku game</div>
       <div class="loading__wheel">
@@ -27,7 +27,7 @@
     <div id="gomoku__title">JOMOKU</div>
     <div id="board">
       <div class="block" v-for="(square, index) in squares" @click="activate(square)">
-        <div class="block__label">{{square.value}}</div>
+        <div class="block__label">{{index}}</div>
         <div class="piece" v-bind:class="{black: square.black, white: square.white}" v-show="square.active"></div>
       </div>
     </div>
@@ -43,7 +43,7 @@
         </div>
         <div id="load__text">THINKING...</div>
       </div>
-      <button class="control__btn">RESTART</button>
+      <button class="control__btn" v-on:click="clear()">CLEAR</button>
       <button class="control__btn">UNDO LAST MOVE</button>
     </div>
     </div>

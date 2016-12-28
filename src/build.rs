@@ -12,9 +12,14 @@ use std::thread;
 use std::time::Duration;
 
 
+pub static mut counter:u32 = 0;
 static mut tf:[u8; 430467210] = [0; 430467210];
 pub fn all () {
   unsafe {
+    // This is for benching
+    if counter > 0 {
+      return;
+    }
 
     // Build the BT Table.
     println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
@@ -26,14 +31,14 @@ pub fn all () {
     // We might want to cache this.
     println!("COMMENT: NO CACHE FOUND. GENERATING...");
     let mut threads = vec![];
-    threads.push(thread::spawn(|| {
-      binary_recurse(0,0,13);
-    }));
     threads.push(thread::spawn( || {
       binary_recurse(1 << 14,0,13);
     }));
     threads.push(thread::spawn(|| {
       binary_recurse(0,1 << 14,13);
+    }));
+    threads.push(thread::spawn(|| {
+      binary_recurse(0,0,13);
     }));
 
     for t in threads {
@@ -80,12 +85,11 @@ pub fn all () {
 /**
  * Recurses through all the places.
  */
-pub static mut counter:u32 = 0;
 unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
   
   if depth < 0 {
     counter += 1;
-    if counter % 100000 == 0{
+    if counter % 1000000 == 0{
       println!("COMMENT: {:}% FINISHED", (((counter as f32) / 14348907f32) * 100f32).round());
     }
     let state: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
@@ -114,7 +118,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     }
     if (you_state == 0b11111) || (opp_state == 0b11111) {
       super::board::WON[you as usize] = 100;
-      return;
+      return; 
     }
 
     if you_state == 0 {

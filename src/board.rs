@@ -10,10 +10,10 @@ pub static mut WON: [u8; 65536] = [0; 65536];
 pub struct Board {
   pub multi: [[u8; 15]; 15],
 
-  pub horiz_y: [u16; 15],
-  pub horiz_o: [u16; 15],
-  pub verti_y: [u16; 15],
-  pub verti_o: [u16; 15],
+  pub horiz_y: [u16; 19],
+  pub horiz_o: [u16; 19],
+  pub verti_y: [u16; 19],
+  pub verti_o: [u16; 19],
 
   pub diagr_y: [u16; 19],
   pub diagr_o: [u16; 19],
@@ -22,7 +22,7 @@ pub struct Board {
 }
 
 
-
+pub const NIL: u8 = 240;
 pub static HORIZ: [(usize, usize); 225] = [
   (00,14),(00,13),(00,12),(00,11),(00,10),(00,09),(00,08),(00,07),(00,06),(00,05),(00,04),(00,03),(00,02),(00,01),(00,00),
   (01,14),(01,13),(01,12),(01,11),(01,10),(01,09),(01,08),(01,07),(01,06),(01,05),(01,04),(01,03),(01,02),(01,01),(01,00),
@@ -60,6 +60,8 @@ pub static VERTI: [(usize, usize); 225] = [
 ];
 
 
+
+const NO:usize = 15;
 pub static HORIZ_ARRS:[[u8; 15]; 15] = [
   [000,001,002,003,004,005,006,007,008,009,010,011,012,013,014],
   [015,016,017,018,019,020,021,022,023,024,025,026,027,028,029],
@@ -95,7 +97,73 @@ pub static VERTI_ARRS:[[u8; 15]; 15] = [
   [013,028,043,058,073,088,103,118,133,148,163,178,193,208,223],
   [014,029,044,059,074,089,104,119,134,149,164,179,194,209,224]
 ];
-  
+
+pub static DIAGL: [(usize, usize); 225] = [
+  (NO,NO),(NO,NO),(NO,NO),(NO,NO),(00,00),(01,00),(02,00),(03,00),(04,00),(05,00),(06,00),(07,00),(08,00),(09,00),(10,00),
+  (NO,NO),(NO,NO),(NO,NO),(00,01),(01,01),(02,01),(03,01),(04,01),(05,01),(06,01),(07,01),(08,01),(09,01),(10,01),(11,00),
+  (NO,NO),(NO,NO),(00,02),(01,02),(02,02),(03,02),(04,02),(05,02),(06,02),(07,02),(08,02),(09,02),(10,02),(11,01),(12,00),
+  (NO,NO),(00,03),(01,03),(02,03),(03,03),(04,03),(05,03),(06,03),(07,03),(08,03),(09,03),(10,03),(11,02),(12,01),(13,00),
+  (00,04),(01,04),(02,04),(03,04),(04,04),(05,04),(06,04),(07,04),(08,04),(09,04),(10,04),(11,03),(12,02),(13,01),(14,00),
+  (01,05),(02,05),(03,05),(04,05),(05,05),(06,05),(07,05),(08,05),(09,05),(10,05),(11,04),(12,03),(13,02),(14,01),(15,00),
+  (02,06),(03,06),(04,06),(05,06),(06,06),(07,06),(08,06),(09,06),(10,06),(11,05),(12,04),(13,03),(14,02),(15,01),(16,00),
+  (03,07),(04,07),(05,07),(06,07),(07,07),(08,07),(09,07),(10,07),(11,06),(12,05),(13,04),(14,03),(15,02),(16,01),(17,00),
+  (04,08),(05,08),(06,08),(07,08),(08,08),(09,08),(10,08),(11,07),(12,06),(13,05),(14,04),(15,03),(16,02),(17,01),(18,00),
+  (05,09),(06,09),(07,09),(08,09),(09,09),(10,09),(11,08),(12,07),(13,06),(14,05),(15,04),(16,03),(17,02),(18,01),(19,00),
+  (06,10),(07,10),(08,10),(09,10),(10,10),(11,09),(12,08),(13,07),(14,06),(15,05),(16,04),(17,03),(18,02),(19,01),(20,00),
+  (07,11),(08,11),(09,11),(10,11),(11,10),(12,09),(13,08),(14,07),(15,06),(16,05),(17,04),(18,03),(19,02),(20,01),(NO,NO),
+  (08,12),(09,12),(10,12),(11,11),(12,10),(13,09),(14,08),(15,07),(16,06),(17,05),(18,04),(19,03),(20,02),(NO,NO),(NO,NO),
+  (09,13),(10,13),(11,12),(12,11),(13,10),(14,09),(15,08),(16,07),(17,06),(18,05),(19,04),(20,03),(NO,NO),(NO,NO),(NO,NO),
+  (10,14),(11,13),(12,12),(13,11),(14,10),(15,09),(16,08),(17,07),(18,06),(19,05),(20,04),(NO,NO),(NO,NO),(NO,NO),(NO,NO)
+];
+
+pub static DIAGL_ARRS:[[u8; 15]; 21] = [
+  [060,046,032,018,004,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [075,061,047,033,019,005,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [090,076,062,048,034,020,006,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [105,091,077,063,049,035,021,007,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [120,106,092,078,064,050,036,022,008,NIL,NIL,NIL,NIL,NIL,NIL],
+  [135,121,107,093,079,065,051,037,023,009,NIL,NIL,NIL,NIL,NIL],
+  [150,136,122,108,094,080,066,052,038,024,010,NIL,NIL,NIL,NIL],
+  [165,151,137,123,109,095,081,067,053,039,025,011,NIL,NIL,NIL],
+  [180,166,152,138,124,110,096,082,068,054,040,026,012,NIL,NIL],
+  [195,181,167,153,139,125,111,097,083,069,055,041,027,013,NIL],
+  [210,196,182,168,154,140,126,112,098,084,070,056,042,028,014],
+  [211,197,183,169,155,141,127,113,099,085,071,057,043,029,NIL],
+  [212,198,184,170,156,142,128,114,100,086,072,058,044,NIL,NIL],
+  [213,199,185,171,157,143,129,115,101,087,073,059,NIL,NIL,NIL],
+  [214,200,186,172,158,144,130,116,102,088,074,NIL,NIL,NIL,NIL],
+  [215,201,187,173,159,145,131,117,103,089,NIL,NIL,NIL,NIL,NIL],
+  [216,202,188,174,160,146,132,118,104,NIL,NIL,NIL,NIL,NIL,NIL],
+  [217,203,189,175,161,147,133,119,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [218,204,190,176,162,148,134,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [219,205,191,177,163,149,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [220,206,192,178,164,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL]
+];
+
+pub static DIAGR_ARRS:[[u8; 15]; 21] = [
+  [010,026,042,058,074,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [009,025,041,057,073,089,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [008,024,040,056,072,088,104,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [007,023,039,055,071,087,103,119,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [006,022,038,054,070,086,102,118,134,NIL,NIL,NIL,NIL,NIL,NIL],
+  [005,021,037,053,069,085,101,117,133,149,NIL,NIL,NIL,NIL,NIL],
+  [004,020,036,052,068,084,100,116,132,148,164,NIL,NIL,NIL,NIL],
+  [003,019,035,051,067,083,099,115,131,147,163,179,NIL,NIL,NIL],
+  [002,018,034,050,066,082,098,114,130,146,162,178,194,NIL,NIL],
+  [001,017,033,049,065,081,097,113,129,145,161,177,193,209,NIL],
+  [000,016,032,048,064,080,096,112,128,144,160,176,192,208,224],
+  [015,031,047,063,079,095,111,127,143,159,175,191,207,223,NIL],
+  [030,046,062,078,094,110,126,142,158,174,190,206,222,NIL,NIL],
+  [045,061,077,093,109,125,141,157,173,189,205,221,NIL,NIL,NIL],
+  [060,076,092,108,124,140,156,172,188,204,220,NIL,NIL,NIL,NIL],
+  [075,091,107,123,139,155,171,187,203,219,NIL,NIL,NIL,NIL,NIL],
+  [090,106,122,138,154,170,186,202,218,NIL,NIL,NIL,NIL,NIL,NIL],
+  [105,121,137,153,169,185,201,217,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [120,136,152,168,184,200,216,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [135,151,167,183,199,215,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
+  [150,166,182,198,214,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL]
+];
+
 impl Board {
   pub fn won (&self, you: bool) -> bool {
     unsafe {
@@ -118,22 +186,105 @@ impl Board {
   pub fn gen_moves (&self) -> Vec<(u8,u8)> {
     let mut movs:Vec<(u8,u8)> = vec![];
     unsafe {
-      for i in 0..15usize {
-        let v_state = (2 * BT[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize];
-        let h_state = (2 * BT[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize];
+      let mut i = 0usize;
+      loop {
+        if i >= 19{
+          break;
+        }
 
-        let v_movs: Vec<(u8,u8)> = MOVES[v_state as usize].iter().filter(|el| el.1 != 0).map(|el| (VERTI_ARRS[i][14usize - el.0 as usize],el.1)).collect();
+        
+        let mut h_done = true;
+        let mut v_done = true;
+        let mut l_done = true;
+
+        let mut v_state = MOVES[((2 * BT[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
+        let mut h_state = MOVES[((2 * BT[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
+        let mut l_state = MOVES[((2 * BT[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize].iter();
+        if i < 15{
+
+          loop {
+            if v_done {
+              match v_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !h_done && !l_done {break;} v_done = false;
+                  } else {
+                    movs.push((VERTI_ARRS[i][14usize - mov.0 as usize], mov.1));
+                  }
+                }
+                None => {
+                  if !h_done && !l_done { break;} v_done = false;
+                }
+              }
+            }
+            if h_done {
+              match h_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !v_done && !l_done {break;} h_done = false;
+                  } else {
+                    movs.push((HORIZ_ARRS[i][14usize - mov.0 as usize], mov.1));
+                  }
+                },
+                None => {
+                  if !v_done && !l_done {break;} h_done = false;
+                },
+              }
+            }
+            if l_done {
+              match l_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !v_done && !h_done {break;} l_done = false;
+                  } else {
+                    let a = DIAGL_ARRS[i][14usize - mov.0 as usize];
+                    if a != NIL {
+                      movs.push((a, mov.1));
+                    }
+                  }
+                },
+                None => {
+                  if !v_done && !h_done {break;} l_done = false;
+                },
+              }
+            }
+          }
+        } else {
+          println!("HERE");
+          match l_state.next() {
+            Some(mov) => {
+              if mov.1 == 0 {
+                break;
+              } else {
+                let a = DIAGL_ARRS[i][14usize - mov.0 as usize];
+                if a != NIL {
+                  movs.push((a, mov.1));
+                }
+              }
+            },
+            None => {
+              break;
+            },
+          }
+        }
+
+        i += 1;
+      }/*
+        let v_movs: Vec<(u8,u8)> = v_state as usize].iter().filter(|el| el.1 != 0).map(|el| (VERTI_ARRS[i][14usize - el.0 as usize],el.1)).collect();
         movs.extend(&v_movs);
         let h_movs: Vec<(u8,u8)> = MOVES[h_state as usize].iter().filter(|el| el.1 != 0).map(|el| (HORIZ_ARRS[i][14usize - el.0 as usize],el.1)).collect();
         movs.extend(&h_movs);
-      }
-    }
+*/  }
 
     let mut real_movs: Vec<(u8, u8)> = vec![];
     let mut first = false;
     let mut cur_mov = (15,15);
 
     for mov in &movs {
+      if mov.0 == NIL {
+        continue;
+      }
+
       if mov.0 == cur_mov.0 {
         cur_mov.1 += mov.1
       } else {
@@ -146,6 +297,9 @@ impl Board {
         }
       }
     }
+    if first{
+      real_movs.push(cur_mov)
+    }
     return real_movs;
   }
 
@@ -154,9 +308,11 @@ impl Board {
       if you {
         self.place_horiz_you(place);
         self.place_verti_you(place);
+        self.place_diagl_you(place);
       } else {
         self.place_horiz_opp(place);
         self.place_verti_opp(place);
+        self.place_diagl_opp(place);
       }
     }
   }
@@ -166,45 +322,29 @@ impl Board {
       if you {
         self.remove_horiz_you(place);
         self.remove_verti_you(place);
+        self.remove_diagl_you(place);
       } else {
         self.remove_horiz_opp(place);
         self.remove_verti_opp(place);
+        self.remove_diagl_opp(place);
       }
     }
   }
 
-  pub unsafe fn place_horiz_you (&mut self, place: usize) {
-    let mov = HORIZ[place];
-    self.horiz_y[mov.0] |= (1 << mov.1); 
-  }
-  pub unsafe fn place_verti_you (&mut self, place: usize) {
-    let mov = VERTI[place];
-    self.verti_y[mov.0] |= (1 << mov.1); 
-  }
-  pub unsafe fn place_horiz_opp (&mut self, place: usize) {
-    let mov = HORIZ[place];
-    self.horiz_o[mov.0] |= (1 << mov.1); 
-  }
-  pub unsafe fn place_verti_opp (&mut self, place: usize) {
-    let mov = VERTI[place];
-    self.verti_o[mov.0] |= (1 << mov.1); 
-  }
+  pub unsafe fn place_horiz_you (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_y[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_verti_you (&mut self, place: usize) {let mov = VERTI[place]; self.verti_y[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_horiz_opp (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_o[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_verti_opp (&mut self, place: usize) {let mov = VERTI[place]; self.verti_o[mov.0] |= (1 << mov.1);}
 
-  pub unsafe fn remove_horiz_you (&mut self, place: usize) {
-    let mov = HORIZ[place];
-    self.horiz_y[mov.0] ^= (1 << mov.1); 
-  }
-  pub unsafe fn remove_verti_you (&mut self, place: usize) {
-    let mov = VERTI[place];
-    self.verti_y[mov.0] ^= (1 << mov.1); 
-  }
-  pub unsafe fn remove_horiz_opp (&mut self, place: usize) {
-    let mov = HORIZ[place];
-    self.horiz_o[mov.0] ^= (1 << mov.1); 
-  }
-  pub unsafe fn remove_verti_opp (&mut self, place: usize) {
-    let mov = VERTI[place];
-    self.verti_o[mov.0] ^= (1 << mov.1); 
-  }
+  pub unsafe fn remove_horiz_you (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_y[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_verti_you (&mut self, place: usize) {let mov = VERTI[place]; self.verti_y[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_horiz_opp (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_o[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_verti_opp (&mut self, place: usize) {let mov = VERTI[place]; self.verti_o[mov.0] ^= (1 << mov.1);}
+
+  pub unsafe fn place_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_y[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_o[mov.0] |= (1 << mov.1);}
+
+  pub unsafe fn remove_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_y[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_o[mov.0] ^= (1 << mov.1);}
 }
 
