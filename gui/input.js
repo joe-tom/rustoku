@@ -18,6 +18,7 @@ function parse(data) {
     JSON.parse(arr).filter(tup => tup[1] != 0).forEach((i) => {
       Board.$data.squares[i[0]].value = i[1]
     })
+    Board.activate(Board.$data.squares[JSON.parse(arr).filter(tup => tup[1] != 0).sort((a,b) => (b[1] - a[1]))[0][0]], true)
   }else {
     console.log(data)
   }

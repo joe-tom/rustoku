@@ -14,12 +14,14 @@ var Board = new Vue({
   })
 })
 
-Board.activate = function (sq) {
+Board.activate = function (sq, me) {
   if (sq.active) return
   sq.active = true
   sq[(Board.$data.thinking?'white':'black')] = true 
   Board.$data.thinking = !Board.$data.thinking
-  engine.stdin.write(Board.$data.squares.map((i) => (i.black?2:(i.white?1:0))).join(',')+'\n')
+  if (!me) {
+    engine.stdin.write(Board.$data.squares.map((i) => (i.black?2:(i.white?1:0))).join(',')+'\n')
+  }
 }
 
 

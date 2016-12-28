@@ -8,6 +8,9 @@ use std::io::prelude::*;
 use std::mem;
 use std;
 
+use std::thread;
+use std::time::Duration;
+
 
 static mut tf:[u8; 430467210] = [0; 430467210];
 pub fn all () {
@@ -22,7 +25,20 @@ pub fn all () {
     // Build the Move and WON Table.
     // We might want to cache this.
     println!("COMMENT: NO CACHE FOUND. GENERATING...");
-    binary_recurse(0,0,14);
+    let mut threads = vec![];
+    threads.push(thread::spawn(|| {
+      binary_recurse(0,0,13);
+    }));
+    threads.push(thread::spawn( || {
+      binary_recurse(1 << 14,0,13);
+    }));
+    threads.push(thread::spawn(|| {
+      binary_recurse(0,1 << 14,13);
+    }));
+
+    for t in threads {
+      t.join();
+    }
     super::board::MOVES[0] = [(0,0);15];
     /*
     match File::open("WON_TABLE_CACHE.bin") {
@@ -89,7 +105,7 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
 unsafe fn build_state(you: u16, opp: u16, state: usize) {
   let mut you_movs: Vec<(u8, u8)> = vec![];
 
-  for shift in 0..11u16{
+  for shift in 0..12u16{
     let you_state = (you >> shift) & 0b11111;
     let opp_state = (opp >> shift) & 0b11111;
 

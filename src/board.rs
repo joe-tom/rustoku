@@ -122,14 +122,31 @@ impl Board {
         let v_state = (2 * BT[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize];
         let h_state = (2 * BT[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize];
 
-        let v_movs: Vec<(u8,u8)> = MOVES[v_state as usize].iter().map(|el| (VERTI_ARRS[i][14usize - el.0 as usize],el.1)).collect();
+        let v_movs: Vec<(u8,u8)> = MOVES[v_state as usize].iter().filter(|el| el.1 != 0).map(|el| (VERTI_ARRS[i][14usize - el.0 as usize],el.1)).collect();
         movs.extend(&v_movs);
-        let h_movs: Vec<(u8,u8)> = MOVES[h_state as usize].iter().map(|el| (HORIZ_ARRS[i][14usize - el.0 as usize],el.1)).collect();
+        let h_movs: Vec<(u8,u8)> = MOVES[h_state as usize].iter().filter(|el| el.1 != 0).map(|el| (HORIZ_ARRS[i][14usize - el.0 as usize],el.1)).collect();
         movs.extend(&h_movs);
       }
     }
-    movs.dedup();
-    return movs;
+
+    let mut real_movs: Vec<(u8, u8)> = vec![];
+    let mut first = false;
+    let mut cur_mov = (15,15);
+
+    for mov in &movs {
+      if mov.0 == cur_mov.0 {
+        cur_mov.1 += mov.1
+      } else {
+        if first {
+          real_movs.push(cur_mov);
+          cur_mov = *mov;
+        }else {
+          first = true;
+          cur_mov = *mov;
+        }
+      }
+    }
+    return real_movs;
   }
 
   pub fn place_piece (&mut self, place: usize, you: bool) {
