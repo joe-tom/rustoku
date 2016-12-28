@@ -148,7 +148,7 @@ fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
     }
   }
   
-  let value = (5 - (movs.len() as u8));
+  let value = (5 - (movs.len() as u8)) * 5;
   let mut mov_urg: Vec<(u8, u8)> = vec![];
 
   for mov in &movs {

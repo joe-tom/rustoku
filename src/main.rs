@@ -3,35 +3,33 @@
 
 extern crate test;
 use test::Bencher;
-
+use std::io::{stdin, stdout, BufRead};
 
 mod board;
 mod build;
 mod input;
 
 fn main () {
+  // Building everything
   build::all();
-  let mut brd = board::Board {
-    multi: [[0; 15]; 15],
-    
-    horiz_y: [0; 15],
-    horiz_o: [0; 15],
-    verti_y: [0; 15],
-    verti_o: [0; 15],
-    diagr_y: [0; 19],
-    diagr_o: [0; 19],
-    diagl_y: [0; 19],
-    diagl_o: [0; 19]
-  };
-  brd.place_piece(84, true);
-  println!("{:?}", brd.gen_moves());
-  unsafe {
-    println!("000000111000 {:?}", board::MOVES[u32::from_str_radix("000000111000",3).unwrap() as usize]);
-    println!("000000110100 {:?}", board::MOVES[u32::from_str_radix("000000110100",3).unwrap() as usize]);
-    println!("000000111100 {:?}", board::MOVES[u32::from_str_radix("000000111100",3).unwrap() as usize]);
-    println!("000000110000 {:?}", board::MOVES[u32::from_str_radix("000000110000",3).unwrap() as usize]);
+  println!("EVENT: READY!");
+
+  // Start the loop to wait
+  let mut buffer = String::new();
+  loop {
+    let inp = stdin();
+    let out = stdout();
+
+    let mut handle = out.lock();
+    for line in inp.lock().lines() {
+      println!("MOVES: {:?}", input::parse_board(line.unwrap() as String).gen_moves());
+    }
   }
 }
+
+
+
+
 use std::collections::HashMap;
 use std::slice;
 use std::str;
@@ -142,35 +140,3 @@ fn minimax (brd: &mut board::Board, depth: u8, you: bool) -> i16 {
     return v;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
