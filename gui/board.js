@@ -9,7 +9,8 @@ var Board = new Vue({
 
 '.'.repeat(225).split('').map(() => {
   Board.squares.push({
-    active: false
+    active: false,
+    value: ''
   })
 })
 
@@ -18,6 +19,7 @@ Board.activate = function (sq) {
   sq.active = true
   sq[(Board.$data.thinking?'white':'black')] = true 
   Board.$data.thinking = !Board.$data.thinking
+  engine.stdin.write(Board.$data.squares.map((i) => (i.black?2:(i.white?1:0))).join(',')+'\n')
 }
 
 
