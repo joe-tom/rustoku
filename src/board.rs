@@ -116,6 +116,24 @@ pub static DIAGL: [(usize, usize); 225] = [
   (10,14),(11,13),(12,12),(13,11),(14,10),(15,09),(16,08),(17,07),(18,06),(19,05),(20,04),(NO,NO),(NO,NO),(NO,NO),(NO,NO)
 ];
 
+pub static DIAGR: [(usize, usize); 225] = [
+  (10,14),(09,13),(08,12),(07,11),(06,10),(05,09),(04,08),(03,07),(02,06),(01,05),(00,04),(NO,NO),(NO,NO),(NO,NO),(NO,NO),
+  (11,13),(10,13),(09,12),(08,11),(07,10),(06,09),(05,08),(04,07),(03,06),(02,05),(01,04),(00,03),(NO,NO),(NO,NO),(NO,NO),
+  (12,12),(11,12),(10,12),(09,11),(08,10),(07,09),(06,08),(05,07),(04,06),(03,05),(02,04),(01,03),(00,02),(NO,NO),(NO,NO),
+  (13,11),(12,11),(11,11),(10,11),(09,10),(08,09),(07,08),(06,07),(05,06),(04,05),(03,04),(02,03),(01,02),(00,01),(NO,NO),
+  (14,10),(13,10),(12,10),(11,10),(10,10),(09,09),(08,08),(07,07),(06,06),(05,05),(04,04),(03,03),(02,02),(01,01),(00,00),
+  (15,09),(14,09),(13,09),(12,09),(11,09),(10,09),(09,08),(08,07),(07,06),(06,05),(05,04),(04,03),(03,02),(02,01),(01,00),
+  (16,08),(15,08),(14,08),(13,08),(12,08),(11,08),(10,08),(09,07),(08,06),(07,05),(06,04),(05,03),(04,02),(03,01),(02,00),
+  (17,07),(16,07),(15,07),(14,07),(13,07),(12,07),(11,07),(10,07),(09,06),(08,05),(07,04),(06,03),(05,02),(04,01),(03,00),
+  (18,06),(17,06),(16,06),(15,06),(14,06),(13,06),(12,06),(11,06),(10,06),(09,05),(08,04),(07,03),(06,02),(05,01),(04,00),
+  (19,05),(18,05),(17,05),(16,05),(15,05),(14,05),(13,05),(12,05),(11,05),(10,05),(09,04),(08,03),(07,02),(06,01),(05,00),
+  (20,04),(19,04),(18,04),(17,04),(16,04),(15,04),(14,04),(13,04),(12,04),(11,04),(10,04),(09,03),(08,02),(07,01),(06,00),
+  (NO,NO),(20,03),(19,03),(18,03),(17,03),(16,03),(15,03),(14,03),(13,03),(12,03),(11,03),(10,03),(09,02),(08,01),(07,00),
+  (NO,NO),(NO,NO),(20,02),(19,02),(18,02),(17,02),(16,02),(15,02),(14,02),(13,02),(12,02),(11,02),(10,02),(09,01),(08,00),
+  (NO,NO),(NO,NO),(NO,NO),(20,01),(19,01),(18,01),(17,01),(16,01),(15,01),(14,01),(13,01),(12,01),(11,01),(10,01),(09,00),
+  (NO,NO),(NO,NO),(NO,NO),(NO,NO),(20,00),(19,00),(18,00),(17,00),(16,00),(15,00),(14,00),(13,00),(12,00),(11,00),(10,00)
+];
+
 pub static DIAGL_ARRS:[[u8; 15]; 21] = [
   [004,018,032,046,060,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
   [005,019,033,047,061,075,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL],
@@ -188,6 +206,7 @@ impl Board {
     unsafe {
       let mut i = 0usize;
       loop {
+
         if i >= 21{
           break;
         }
@@ -196,24 +215,27 @@ impl Board {
         let mut h_done = true;
         let mut v_done = true;
         let mut l_done = true;
+        let mut r_done = true;
 
         let mut v_state = MOVES[((2 * BT[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
         let mut h_state = MOVES[((2 * BT[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
         let mut l_state = MOVES[((2 * BT[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize].iter();
-        if i < 15{
+        let mut r_state = MOVES[((2 * BT[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize].iter();
+
+        if i < 15 {
 
           loop {
             if v_done {
               match v_state.next() {
                 Some(mov) => {
                   if mov.1 == 0 {
-                    if !h_done && !l_done {break;} v_done = false;
+                    if !h_done && !l_done && !r_done {break;} v_done = false;
                   } else {
                     movs.push((VERTI_ARRS[i][14usize - mov.0 as usize], mov.1));
                   }
                 }
                 None => {
-                  if !h_done && !l_done { break;} v_done = false;
+                  if !h_done && !l_done && !r_done { break;} v_done = false;
                 }
               }
             }
@@ -221,13 +243,13 @@ impl Board {
               match h_state.next() {
                 Some(mov) => {
                   if mov.1 == 0 {
-                    if !v_done && !l_done {break;} h_done = false;
+                    if !v_done && !l_done && !r_done{break;} h_done = false;
                   } else {
                     movs.push((HORIZ_ARRS[i][14usize - mov.0 as usize], mov.1));
                   }
                 },
                 None => {
-                  if !v_done && !l_done {break;} h_done = false;
+                  if !v_done && !l_done && !r_done {break;} h_done = false;
                 },
               }
             }
@@ -235,7 +257,7 @@ impl Board {
               match l_state.next() {
                 Some(mov) => {
                   if mov.1 == 0 {
-                    if !v_done && !h_done {break;} l_done = false;
+                    if !v_done && !h_done && !r_done {break;} l_done = false;
                   } else {
                     let a = DIAGL_ARRS[i][mov.0 as usize];
                     if a != NIL {
@@ -244,64 +266,97 @@ impl Board {
                   }
                 },
                 None => {
-                  if !v_done && !h_done {break;} l_done = false;
+                  if !v_done && !h_done && !r_done {break;} l_done = false;
                 },
               }
             }
-          }
-          println!("YO");
-        } else {
-          println!("HERE");
-          match l_state.next() {
-            Some(mov) => {
-              if mov.1 == 0 {
-                break;
-              } else {
-                let a = DIAGL_ARRS[i][mov.0 as usize];
-                if a != NIL {
-                  movs.push((a, mov.1));
-                }
+            if r_done {
+              match r_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !v_done && !h_done && !l_done {break;} r_done = false;
+                  } else {
+                    let a = DIAGR_ARRS[i][mov.0 as usize];
+                    if a != NIL {
+                      movs.push((a, mov.1));
+                    }
+                  }
+                },
+                None => {
+                  if !v_done && !h_done && !l_done {break;} r_done = false;
+                },
               }
-            },
-            None => {
-              break;
-            },
+            }
+
+          }
+        } else {
+          loop {
+            match l_state.next() {
+              Some(mov) => {
+                if mov.1 == 0 {
+                  if !r_done {break;} l_done = false;
+                } else {
+                  let a = DIAGL_ARRS[i][mov.0 as usize];
+                  if a != NIL {
+                    movs.push((a, mov.1));
+                  }
+                }
+              },
+              None => {
+                if !r_done {break;} l_done = false;
+              },
+            }
+            match r_state.next() {
+              Some(mov) => {
+                if mov.1 == 0 {
+                  if !l_done {break;} r_done = false;
+                } else {
+                  let a = DIAGR_ARRS[i][mov.0 as usize];
+                  if a != NIL {
+                    movs.push((a, mov.1));
+                  }
+                }
+              },
+              None => {
+                if !l_done {break;} r_done = false;
+              },
+            }
           }
         }
 
         i += 1;
-      }/*
-        let v_movs: Vec<(u8,u8)> = v_state as usize].iter().filter(|el| el.1 != 0).map(|el| (VERTI_ARRS[i][14usize - el.0 as usize],el.1)).collect();
-        movs.extend(&v_movs);
-        let h_movs: Vec<(u8,u8)> = MOVES[h_state as usize].iter().filter(|el| el.1 != 0).map(|el| (HORIZ_ARRS[i][14usize - el.0 as usize],el.1)).collect();
-        movs.extend(&h_movs);
-*/  }
+      }
+    }
 
     let mut real_movs: Vec<(u8, u8)> = vec![];
-    let mut first = false;
-    let mut cur_mov = (15,15);
-    movs.sort_by(|a,b| (a.0).cmp(&b.0));
-    println!("{:?}", movs.len());
-    for mov in &movs {
-      if mov.0 == NIL {
-        continue;
-      }
+    if movs.len() > 0 {
+      movs.sort_by(|a,b| (a.0).cmp(&b.0));
+      let mut mov_iter = movs.into_iter();
 
-      if mov.0 == cur_mov.0 {
-        cur_mov.1 += mov.1
-      } else {
-        if first {
-          real_movs.push(cur_mov);
-          cur_mov = *mov;
-        }else {
-          first = true;
-          cur_mov = *mov;
+      let mut cur_val = 0;
+      let mut cur_mov = 0;
+
+      loop {
+        match mov_iter.next() {
+          Some(mov) => {
+            if mov.0 != cur_mov {
+              real_movs.push((cur_mov, cur_val));
+              cur_mov = mov.0;
+              cur_val = mov.1;
+            } else  {
+              cur_val += mov.1;
+            }
+          }
+          None => {
+            break;
+          }
         }
       }
+ 
+      real_movs[0] = (cur_mov, cur_val);
     }
-    if first{
-      real_movs.push(cur_mov)
-    }
+
+
     return real_movs;
   }
 
@@ -311,10 +366,12 @@ impl Board {
         self.place_horiz_you(place);
         self.place_verti_you(place);
         self.place_diagl_you(place);
+        self.place_diagr_you(place);
       } else {
         self.place_horiz_opp(place);
         self.place_verti_opp(place);
         self.place_diagl_opp(place);
+        self.place_diagr_opp(place);
       }
     }
   }
@@ -325,10 +382,12 @@ impl Board {
         self.remove_horiz_you(place);
         self.remove_verti_you(place);
         self.remove_diagl_you(place);
+        self.remove_diagr_you(place);
       } else {
         self.remove_horiz_opp(place);
         self.remove_verti_opp(place);
         self.remove_diagl_opp(place);
+        self.remove_diagr_opp(place);
       }
     }
   }
@@ -345,8 +404,19 @@ impl Board {
 
   pub unsafe fn place_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_y[mov.0] |= (1 << mov.1);}
   pub unsafe fn place_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_o[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_diagr_you (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_y[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_diagr_opp (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_o[mov.0] |= (1 << mov.1);}
 
   pub unsafe fn remove_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_y[mov.0] ^= (1 << mov.1);}
   pub unsafe fn remove_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_o[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_diagr_you (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_y[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_diagr_opp (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_o[mov.0] ^= (1 << mov.1);}
 }
+
+
+
+
+
+
+
 

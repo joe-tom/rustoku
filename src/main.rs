@@ -96,6 +96,11 @@ fn less_moves(b: &mut test::Bencher) {
     diagl_y: [0; 21],
     diagl_o: [0; 21]
   };
+  brd.place_piece(070,true);
+  brd.place_piece(084,true);
+  brd.place_piece(154,true);
+  brd.place_piece(168,true);
+  brd.place_piece(182,true);
 
   b.iter(|| {
     let mut bord = test::black_box(&brd);
@@ -111,7 +116,6 @@ fn move_place() {
   }
 
 }
-
 
 
 

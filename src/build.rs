@@ -21,6 +21,16 @@ pub fn all () {
       return;
     }
 
+    println!("COMMENT: BUILDING WON TABLE");
+    for state in 0..65536 {
+      for shift in 0..12 {
+        if (state >> shift) & 0b11111 == 0b11111 {
+          super::board::WON[state as usize];
+          break;
+        }
+      }
+    }
+
     // Build the BT Table.
     println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
     for state in 0..65536{
@@ -86,7 +96,10 @@ pub fn all () {
  * Recurses through all the places.
  */
 unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
-  
+  // Trim :)
+  if (super::board::WON[you as usize] | super::board::WON[opp as usize]) != 0 {
+    return;
+  }
   if depth < 0 {
     counter += 1;
     if counter % 1000000 == 0{
@@ -96,6 +109,7 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
     build_state(you, opp, state as usize);
     return;
   }
+
 
   binary_recurse(you | (1 << (depth as u16)), opp, depth - 1);
   binary_recurse(you, opp | (1 << (depth as u16)), depth - 1);
@@ -109,18 +123,13 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
 unsafe fn build_state(you: u16, opp: u16, state: usize) {
   let mut you_movs: Vec<(u8, u8)> = vec![];
 
-  for shift in 0..12u16{
+  for shift in 0..15u16{
     let you_state = (you >> shift) & 0b11111;
     let opp_state = (opp >> shift) & 0b11111;
 
     if (you_state == 0) && (opp_state == 0) {
       continue;
     }
-    if (you_state == 0b11111) || (opp_state == 0b11111) {
-      super::board::WON[you as usize] = 100;
-      return; 
-    }
-
     if you_state == 0 {
       you_movs.extend(get_five(opp_state, shift));
     }
@@ -163,6 +172,9 @@ fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
   let mut movs: Vec<u8> = vec![];
 
   for shift in 0..5u16 {
+    if (shift+cur_shift) > 14 {
+      break;
+    }
     if (binary >> shift) & 1 == 0 {
       movs.push((shift + cur_shift) as u8); 
     }

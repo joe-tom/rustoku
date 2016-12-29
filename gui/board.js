@@ -20,13 +20,13 @@ Board.activate = function (sq, me) {
   sq.active = true
   sq[(Board.$data.thinking?'white':'black')] = true 
   Board.$data.thinking = !Board.$data.thinking
-  if (1) {
+  if (!me||me) {
     engine.stdin.write(Board.$data.squares.map((i) => (i.black?2:(i.white?1:0))).join(',')+'\n')
   }
 }
 
 Board.clear = ()  => {
-  Board.$data.square.forEach(i => !(i.active = false)&&(delete i.white||delete i.black))
+  Board.$data.squares.forEach(i => !(i.active = false)&&(delete i.white||delete i.black))
 }
 Board.toString = function () {
 
