@@ -4,6 +4,7 @@
 extern crate test;
 use test::Bencher;
 use std::io::{stdin, stdout, BufRead};
+use std::vec;
 
 mod board;
 mod build;
@@ -32,103 +33,18 @@ fn main () {
 
 
 
+fn next_best (brd: &mut board::Board) -> Vec<(u8,u8)> {
+  let mut movs = brd.gen_moves();
+  let mut val =
+   
+  for mov in &movs {
+  }
+}
+
 
 use std::collections::HashMap;
 use std::slice;
 use std::str;
-
-
-#[bench]
-fn gen_moves(b: &mut test::Bencher) {
-  //build::all();
-
-  let mut brd = board::Board {
-    multi: [0; 225],
-    
-    horiz_y: [0; 21],
-    horiz_o: [0; 21],
-    verti_y: [0; 21],
-    verti_o: [0; 21],
-    diagr_y: [0; 21],
-    diagr_o: [0; 21],
-    diagl_y: [0; 21],
-    diagl_o: [0; 21]
-  };
-
-  brd.place_piece(014,true);
-  brd.place_piece(028,true);
-  brd.place_piece(042,true);
-  brd.place_piece(056,true);
-  brd.place_piece(070,true);
-  brd.place_piece(084,true);
-  brd.place_piece(154,true);
-  brd.place_piece(168,true);
-  brd.place_piece(182,true);
-  brd.place_piece(196,true);
-  brd.place_piece(210,true);
-//let mut books = HashMap::new();
-
-  b.iter(|| {
-    let mut bord = test::black_box(&brd);
-    bord.gen_moves();
-  /*
-    let a = test::black_box(10);
-    let b = test::black_box(false);
-    test::black_box(brd.won(true));
-    unsafe{
-      let mut a = test::black_box([12341u16,5245234u16,1234123u16]);
-      books.insert(a,31);
-      test::black_box(books.get(&a));
-    }*/
-  })
-}
-
-#[bench]
-fn less_moves(b: &mut test::Bencher) {
-  build::all();
-
-  let mut brd = board::Board {
-    multi: [0; 225],
-    
-    horiz_y: [0; 21],
-    horiz_o: [0; 21],
-    verti_y: [0; 21],
-    verti_o: [0; 21],
-    diagr_y: [0; 21],
-    diagr_o: [0; 21],
-    diagl_y: [0; 21],
-    diagl_o: [0; 21]
-  };
-  brd.place_piece(070,true);
-  brd.place_piece(084,true);
-  brd.place_piece(154,true);
-  brd.place_piece(168,true);
-  brd.place_piece(182,true);
-
-  b.iter(|| {
-    let mut bord = test::black_box(&brd);
-    bord.gen_moves();
-  })
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * The actual minimax function

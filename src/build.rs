@@ -131,10 +131,28 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
       continue;
     }
     if you_state == 0 {
-      you_movs.extend(get_five(opp_state, shift));
+      let five_movs: Vec<(u8,u8)> = get_five(opp_state, shift);
+      let mut five_iter = five_movs.iter();
+      loop {
+        match five_iter.next() {
+          Some (x) => {
+            you_movs.push(*x);
+          }
+          None => {break;}
+        }
+      }
     }
     if opp_state == 0 {
-      you_movs.extend(get_five(you_state, shift));
+      let five_movs: Vec<(u8,u8)> = get_five(you_state, shift);
+      let mut five_iter = five_movs.iter();
+      loop {
+        match five_iter.next() {
+          Some (x) => {
+            you_movs.push(*x);
+          }
+          None => {break;}
+        }
+      }
     }
   }
 
@@ -145,7 +163,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
 
   for mov in &you_movs {
     if mov.0 == cur_mov.0 {
-      cur_mov.1 *= mov.1
+      cur_mov.1 += mov.1
     } else {
       if first {
         real_movs.push(cur_mov);
@@ -156,7 +174,9 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
       }
     }
   }
-
+  if first {
+    real_movs.push(cur_mov);
+  }
   let mut i:u8 = 0;
   for mov in &real_movs {
     super::board::MOVES[state][i as usize] = *mov;
@@ -179,8 +199,25 @@ fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
       movs.push((shift + cur_shift) as u8); 
     }
   }
-  
-  let value = (5 - (movs.len() as u8)) * 5;
+
+  let mut value = 0;
+  match (movs.len() as u8) {
+    1 => {
+      value = 100;
+    },
+    2 => {
+      value = 20;
+    },
+    3 => {
+      value = 5;
+    }
+    4 => {
+      value = 1;
+    }
+    _ => {}
+  }
+
+
   let mut mov_urg: Vec<(u8, u8)> = vec![];
 
   for mov in &movs {
