@@ -30,7 +30,7 @@ fn main () {
     }
   }
 }
-
+/*
 
 
 fn next_best (brd: &mut board::Board) -> Vec<(u8,u8)> {
@@ -40,7 +40,7 @@ fn next_best (brd: &mut board::Board) -> Vec<(u8,u8)> {
   for mov in &movs {
   }
 }
-
+*/
 
 use std::collections::HashMap;
 use std::slice;

@@ -25,7 +25,7 @@ pub fn all () {
     for state in 0..65536 {
       for shift in 0..12 {
         if (state >> shift) & 0b11111 == 0b11111 {
-          super::board::WON[state as usize];
+          super::board::WON[state as usize] = 1;
           break;
         }
       }

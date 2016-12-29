@@ -197,6 +197,9 @@ impl Board {
     return 0;
   }
   pub fn gen_moves (&self) -> Vec<(u8,u16)> {
+    if self.won() != 0 {
+      return vec![(self.won() ,0)];
+    }
     let mut movs:Vec<(u8,u8)> = vec![];
     unsafe {
       let mut i = 0usize;
@@ -353,8 +356,8 @@ impl Board {
     
       real_movs[0] = (cur_mov, cur_val);
     }
-
-
+    
+    real_movs.sort_by(|a,b| (b.1).cmp(&a.1));
     return real_movs;
   }
 
