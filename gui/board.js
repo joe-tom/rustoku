@@ -20,7 +20,7 @@ Board.activate = function (sq, me) {
   sq.active = true
   sq[(Board.$data.thinking?'white':'black')] = true 
   Board.$data.thinking = !Board.$data.thinking
-  if (!me||me) {
+  if (!me) {
     engine.stdin.write(Board.$data.squares.map((i) => (i.black?2:(i.white?1:0))).join(',')+'\n')
   }
 }

@@ -5,6 +5,7 @@ extern crate test;
 use test::Bencher;
 use std::io::{stdin, stdout, BufRead};
 use std::vec;
+use std::cmp;
 
 mod board;
 mod build;
@@ -26,7 +27,7 @@ fn main () {
     for line in inp.lock().lines() {
       let mut brd = input::parse_board(line.unwrap() as String);
       println!("{:?}",brd.won());
-      println!("MOVES: {:?}", brd.gen_moves());
+      println!("MOVES: {:?}", minimax(&mut brd,-100,100,4,true));
     }
   }
 }
@@ -50,45 +51,57 @@ use std::str;
  * The actual minimax function
  */
 
-fn minimax (brd: &mut board::Board, depth: u8, you: bool) -> i16 {
+const THRESHOLD: u16 = 100;
+
+fn minimax (brd: &mut board::Board,mut a: i16,mut b: i16, depth: u8, you: bool) -> (u8, i16) {
   if depth == 0 {
-    if brd.won() != 0 {
-      return if you {100} else {-100};
+    let done = brd.gen_moves()[0];
+    return (done.0, done.1 as i16);
+  }
+  let won = brd.won();
+  match won {
+    2 => {
+      return (0, 100);
+    },
+    1 => {
+      return (0, -100);
     }
-
-    return 0;
+    _ => {}
   }
-
-  if brd.won() != 0 {
-    return if you {100} else {-100};
-  }
-
   let movs = brd.gen_moves();
-  if you {  
-    let mut v = 0;
+
+
+  if you {
+    let v = -100;
     for mov in &movs {
-      brd.place_piece(mov.0 as usize, you);
-      let val = minimax(brd, depth - 1, !you);
-      brd.remove_piece(mov.0 as usize, you);
-      
-      if val > v {
-        v = val;
+      if mov.1 <= THRESHOLD {
         break;
       }
+      brd.place_piece(mov.0 as usize, you);
+      let v = cmp::max(minimax(brd,a,b,depth - 1, !you).1, v);
+      a = cmp::max(a, v);
+      brd.remove_piece(mov.0 as usize, you);
+      if b <= a {
+        return (mov.0, v);
+      }
     }
-    return v;
+    
+    return (movs[0].0, v);
   } else {
-    let mut v = 0;
+    let v = 100;
     for mov in &movs {
-      brd.place_piece(mov.0 as usize, you);
-      let val = minimax(brd, depth - 1, !you);
-      brd.remove_piece(mov.0 as usize, you);
-      
-      if val > v {
-        v = val;
+      if mov.1 <= THRESHOLD {
         break;
       }
+      brd.place_piece(mov.0 as usize, you);
+      let v = cmp::min(minimax(brd,a,b,depth - 1, !you).1, v);
+      b = cmp::min(v,b);
+      brd.remove_piece(mov.0 as usize, you);
+      if b <= a{
+        return (mov.0, v);
+      }
     }
-    return v;
+    
+    return (movs[0].0, v);
   }
 }
