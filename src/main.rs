@@ -8,6 +8,7 @@ use std::io::{stdin, stdout, BufRead};
 mod board;
 mod build;
 mod input;
+mod tests;
 
 fn main () {
   // Building everything
@@ -22,7 +23,9 @@ fn main () {
 
     let mut handle = out.lock();
     for line in inp.lock().lines() {
-      println!("MOVES: {:?}", input::parse_board(line.unwrap() as String).gen_moves());
+      let mut brd = input::parse_board(line.unwrap() as String);
+      println!("{:?}",brd.won());
+      println!("MOVES: {:?}", brd.gen_moves());
     }
   }
 }
@@ -37,10 +40,10 @@ use std::str;
 
 #[bench]
 fn gen_moves(b: &mut test::Bencher) {
-  build::all();
+  //build::all();
 
   let mut brd = board::Board {
-    multi: [[0; 15]; 15],
+    multi: [0; 225],
     
     horiz_y: [0; 21],
     horiz_o: [0; 21],
@@ -85,7 +88,7 @@ fn less_moves(b: &mut test::Bencher) {
   build::all();
 
   let mut brd = board::Board {
-    multi: [[0; 15]; 15],
+    multi: [0; 225],
     
     horiz_y: [0; 21],
     horiz_o: [0; 21],
@@ -106,15 +109,6 @@ fn less_moves(b: &mut test::Bencher) {
     let mut bord = test::black_box(&brd);
     bord.gen_moves();
   })
-}
-
-
-#[test]
-fn move_place() {
-  unsafe {
-    let c = std::mem::transmute::<&[[(u8,u8); 15]; 14348907], &[u8; 430467210]>(&board::MOVES);
-  }
-
 }
 
 
@@ -142,14 +136,14 @@ fn move_place() {
 
 fn minimax (brd: &mut board::Board, depth: u8, you: bool) -> i16 {
   if depth == 0 {
-    if brd.won(!you) {
+    if brd.won() != 0 {
       return if you {100} else {-100};
     }
 
     return 0;
   }
 
-  if brd.won(!you) {
+  if brd.won() != 0 {
     return if you {100} else {-100};
   }
 

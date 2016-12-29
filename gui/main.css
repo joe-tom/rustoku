@@ -12,8 +12,7 @@ body{
 #board{
   height: 600px;
   width: 600px;
-  border-top: 1px solid rgba(0,0,0,0.05);
-  border-left: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
   border-radius: 3px;
   position: absolute;
   top: 50px;
@@ -23,7 +22,8 @@ body{
   .block{
     height: 40px;
     width: 40px;
-    border: 1px solid rgba(0,0,0,0.05);
+    background: url('./grid.png') center center no-repeat;
+    background-size: 100%;
     float: left;
     border-top: 0;
     border-left: 0;

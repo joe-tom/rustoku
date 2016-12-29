@@ -1,16 +1,10 @@
 
-
-
-
-
-
-
 // Accepts a csv of the board. and returns a real board
 pub fn parse_board (board: String) -> super::board::Board{
   let mut squares = board.split(',');
 
   let mut B = super::board::Board{
-    multi: [[0; 15]; 15],
+    multi: [0; 225],
 
     horiz_y: [0; 21],
     horiz_o: [0; 21],
@@ -38,8 +32,6 @@ pub fn parse_board (board: String) -> super::board::Board{
     }
     i += 1;
   }
-
-  println!("COMMENT: {:?}", B.horiz_y[0]);
 
   return B;
 }

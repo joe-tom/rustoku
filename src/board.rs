@@ -8,7 +8,7 @@ pub static mut MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
 pub static mut WON: [u8; 65536] = [0; 65536]; 
 
 pub struct Board {
-  pub multi: [[u8; 15]; 15],
+  pub multi: [u8; 225],
 
   pub horiz_y: [u16; 21],
   pub horiz_o: [u16; 21],
@@ -183,23 +183,18 @@ pub static DIAGR_ARRS:[[u8; 15]; 21] = [
 ];
 
 impl Board {
-  pub fn won (&self, you: bool) -> bool {
+  pub fn won (&self) -> u8 {
     unsafe {
-      if you {
-        for i in 0..15usize {
-          if WON[self.verti_y[i] as usize] != 0 || WON[self.horiz_y[i] as usize] != 0 {
-            return true;
-          }
+      for i in 0..21usize {
+        if WON[self.verti_y[i] as usize] != 0 || WON[self.horiz_y[i] as usize] != 0 || WON[self.diagr_y[i] as usize] != 0  || WON[self.diagl_y[i] as usize] != 0{
+          return 1;
         }
-      } else {
-        for i in 0..15usize {
-          if WON[self.verti_o[i] as usize] != 0 || WON[self.horiz_o[i] as usize] != 0 {
-            return true;
-          }
+        if WON[self.verti_o[i] as usize] != 0 || WON[self.horiz_o[i] as usize] != 0 || WON[self.diagr_o[i] as usize] != 0  || WON[self.diagl_o[i] as usize] != 0{
+          return 2;
         }
       }
     }
-    return false;
+    return 0;
   }
   pub fn gen_moves (&self) -> Vec<(u8,u8)> {
     let mut movs:Vec<(u8,u8)> = vec![];
@@ -363,11 +358,13 @@ impl Board {
   pub fn place_piece (&mut self, place: usize, you: bool) {
     unsafe {
       if you {
+        self.multi[place] = 1;
         self.place_horiz_you(place);
         self.place_verti_you(place);
         self.place_diagl_you(place);
         self.place_diagr_you(place);
       } else {
+        self.multi[place] = 2;
         self.place_horiz_opp(place);
         self.place_verti_opp(place);
         self.place_diagl_opp(place);
@@ -378,6 +375,7 @@ impl Board {
 
   pub fn remove_piece (&mut self, place: usize, you: bool) {
     unsafe {
+      self.multi[place] = 0;
       if you {
         self.remove_horiz_you(place);
         self.remove_verti_you(place);
