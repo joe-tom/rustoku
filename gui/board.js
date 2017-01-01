@@ -18,10 +18,10 @@ var Board = new Vue({
 Board.activate = function (sq, me) {
   if (sq.active) return
   sq.active = true
-  sq[(Board.$data.thinking?'white':'black')] = true 
+  sq[(Board.$data.thinking?'black':'white')] = true 
   Board.$data.thinking = !Board.$data.thinking
   if (!me) {
-    engine.stdin.write(Board.$data.squares.map((i) => (i.black?2:(i.white?1:0))).join(',')+'\n')
+    engine.stdin.write(Board.$data.squares.map((i) => (i.black?1:(i.white?2:0))).join(',')+'\n')
   }
 }
 

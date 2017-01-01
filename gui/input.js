@@ -21,19 +21,26 @@ function parse(data) {
   switch (things[0]) {
     case 'COMMENT':
       console.log(data)
-      Board.$data.status = (data.substr(8))
+      Board.$data.status = things[1]
     break
     case 'EVENT':
       Board.$data.ready = true
     break
+    case 'TIME':
+    console.log(data)
+    console.log('Node Evaluation to: ', things[1])
+    break
     case 'MOVES':
-      var arr = data.substr(7).replace(/\(/g,'[').replace(/\)/g,']')
-      console.log(arr)/*
+      var arr = things[1].replace(/\(/g,'[').replace(/\)/g,']')
+      console.log(arr)
+      Board.$data.squares.forEach((sq) => {
+        sq.value = ''
+      })
       JSON.parse(arr).filter(tup => tup[1] != 0).forEach((i) => {
         Board.$data.squares[i[0]].value = i[1]
-      })*/
+      })
       setTimeout(() => {
-        Board.activate(Board.$data.squares[JSON.parse(arr)[0]], true)
+        Board.activate(Board.$data.squares[JSON.parse(arr)[0][0]], true)
       },10)
     break
   }
