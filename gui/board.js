@@ -26,7 +26,12 @@ Board.activate = function (sq, me) {
 }
 
 Board.clear = ()  => {
-  Board.$data.squares.forEach(i => !(i.active = false)&&(delete i.white||delete i.black)&&(i.value = ''))
+  Board.$data.squares.forEach(i => {
+    i.active = false
+    delete i.white
+    delete i.black
+    i.value = ''
+  })
 }
 Board.toString = function () {
 
