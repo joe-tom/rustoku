@@ -11,7 +11,10 @@ AI = true
 '.'.repeat(225).split('').map(() => {
   Board.squares.push({
     active: false,
-    value: ''
+    value: '',
+    black: false,
+    white: false,
+    evaluated: false
   })
 })
 
@@ -29,8 +32,9 @@ Board.activate = function (sq, me) {
 Board.clear = ()  => {
   Board.$data.squares.forEach(i => {
     i.active = false
-    delete i.white
-    delete i.black
+    i.white = false
+    i.black = false
+    i.evaluated = false
     i.value = ''
   })
 }

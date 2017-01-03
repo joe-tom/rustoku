@@ -8,7 +8,7 @@ pub static mut MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
 pub static mut WON: [u8; 65536] = [0; 65536]; 
 
 pub struct Board {
-  pub multi: Vec<u8>,
+  pub multi: [char; 225],
 
   pub horiz_y: [u16; 21],
   pub horiz_o: [u16; 21],
@@ -196,6 +196,7 @@ impl Board {
     }
     return 0;
   }
+
   pub fn gen_moves (&self) -> Vec<(u8,u16)> {
     let mut movs:Vec<(u8,u8)> = vec![];
     unsafe {
@@ -361,13 +362,13 @@ impl Board {
   pub fn place_piece (&mut self, place: usize, you: bool) {
     unsafe {
       if you {
-        self.multi[place] = 49;
+        self.multi[place] = '1';
         self.place_horiz_you(place);
         self.place_verti_you(place);
         self.place_diagl_you(place);
         self.place_diagr_you(place);
       } else {
-        self.multi[place] = 50;
+        self.multi[place] = '2';
         self.place_horiz_opp(place);
         self.place_verti_opp(place);
         self.place_diagl_opp(place);
@@ -378,7 +379,7 @@ impl Board {
 
   pub fn remove_piece (&mut self, place: usize, you: bool) {
     unsafe {
-      self.multi[place] = 0;
+      self.multi[place] = '0';
       if you {
         self.remove_horiz_you(place);
         self.remove_verti_you(place);

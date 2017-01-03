@@ -69,7 +69,7 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
     let d_val = (minimax(brd, depth - 1, !max, alpha, beta, map));
     brd.remove_piece(mov.0 as usize, max);
     values.push((mov.0, d_val.1));
-    println!("DONE {:?}", (mov.0, d_val.1));
+    println!("DONE: {:?}", (mov.0, d_val.1));
     if d_val.1 == 20000 {
       break;
     }
@@ -118,7 +118,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
     }
   }
 
-  let brd_str = String::from_utf8(brd.multi.clone()).unwrap();
+  let brd_str: String = brd.multi.iter().cloned().collect();
   match map.get(&brd_str) {
     Some(value) => {return *value;}
     None => {}
@@ -138,7 +138,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
       brd.place_piece(mov.0 as usize, max);
       let d_val = (minimax(brd, depth - 1, !max, alpha, beta, map));
       brd.remove_piece(mov.0 as usize, max);
-      let brd_str = String::from_utf8(brd.multi.clone()).unwrap();
+      let brd_str: String = brd.multi.iter().cloned().collect();
       map.insert(brd_str, d_val);
       
       if v < d_val.1 {
@@ -162,7 +162,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
       brd.place_piece(mov.0 as usize, max);
       let d_val = (minimax(brd, depth - 1, !max, alpha, beta,  map));
       brd.remove_piece(mov.0 as usize, max);
-      let brd_str = String::from_utf8(brd.multi.clone()).unwrap();
+      let brd_str: String = brd.multi.iter().cloned().collect();
       map.insert(brd_str, d_val);
       
       if v > d_val.1 {

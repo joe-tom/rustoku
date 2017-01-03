@@ -31,6 +31,10 @@ body{
     cursor: pointer;
     position: relative;
   }
+    .done{
+      background: url('./grid-done.png') center center no-repeat;
+      background-size: 100%;
+    }
     .block:hover{
       background-color: rgba(0,0,0,0.1);
     }
