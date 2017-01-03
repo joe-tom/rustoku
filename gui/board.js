@@ -7,7 +7,7 @@ var Board = new Vue({
     status: ''
   }
 })
-
+AI = true
 '.'.repeat(225).split('').map(() => {
   Board.squares.push({
     active: false,
@@ -20,10 +20,11 @@ Board.activate = function (sq, me) {
   sq.active = true
   sq[(Board.$data.thinking?'black':'white')] = true 
   Board.$data.thinking = !Board.$data.thinking
-  if (!me) {
+  if (AI && !me) {
     engine.stdin.write(Board.$data.squares.map((i) => (i.black?1:(i.white?2:0))).join(',')+'\n')
   }
 }
+
 
 Board.clear = ()  => {
   Board.$data.squares.forEach(i => {

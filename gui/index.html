@@ -27,7 +27,7 @@
     <div id="gomoku__title">JOMOKU</div>
     <div id="board">
       <div class="block" v-for="(square, index) in squares" @click="activate(square)">
-        <div class="block__label">{{index}}</div>
+        <div class="block__label">{{square.value}}</div>
         <div class="piece" v-bind:class="{black: square.black, white: square.white}" v-show="square.active"></div>
       </div>
     </div>

@@ -165,7 +165,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
 
   for mov in &you_movs {
     if mov.0 == cur_mov.0 {
-      cur_mov.1 = cmp::max(mov.1, cur_mov.1);
+      cur_mov.1 += mov.1;
     } else {
       if first {
         real_movs.push(cur_mov);

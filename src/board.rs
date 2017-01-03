@@ -8,7 +8,7 @@ pub static mut MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
 pub static mut WON: [u8; 65536] = [0; 65536]; 
 
 pub struct Board {
-  pub multi: [u8; 225],
+  pub multi: Vec<u8>,
 
   pub horiz_y: [u16; 21],
   pub horiz_o: [u16; 21],
@@ -183,14 +183,14 @@ pub static DIAGR_ARRS:[[u8; 15]; 21] = [
 ];
 
 impl Board {
-  pub fn won (&self) -> i8 {
+  pub fn won (&self) -> i32 {
     unsafe {
       for i in 0..21usize {
         if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) != 0 {
-          return 1;
+          return 20000;
         }
         if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) != 0 {
-          return 2;
+          return -20000;
         }
       }
     }
@@ -361,13 +361,13 @@ impl Board {
   pub fn place_piece (&mut self, place: usize, you: bool) {
     unsafe {
       if you {
-        self.multi[place] = 1;
+        self.multi[place] = 49;
         self.place_horiz_you(place);
         self.place_verti_you(place);
         self.place_diagl_you(place);
         self.place_diagr_you(place);
       } else {
-        self.multi[place] = 2;
+        self.multi[place] = 50;
         self.place_horiz_opp(place);
         self.place_verti_opp(place);
         self.place_diagl_opp(place);

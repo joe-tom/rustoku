@@ -43,6 +43,13 @@ function parse(data) {
         Board.activate(Board.$data.squares[JSON.parse(arr)[0][0]], true)
       },10)
     break
+    case 'VALUES':
+      var arr = things[1].replace(/\(/g,'[').replace(/\)/g,']')
+      JSON.parse(arr).filter(tup => tup[1] != 0).forEach((i) => {
+        Board.$data.squares[i[0]].value = i[1]
+      })
+      console.log(arr)
+    break
   }
 
 
