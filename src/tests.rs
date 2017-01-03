@@ -1,10 +1,14 @@
 
+extern crate test;
+use test::Bencher;
+
+
 #[test]
 fn test__genpiece() {
   
   super::build::all();
   let mut brd = super::board::Board {
-    multi: [[0; 15]; 15],
+    multi: [0; 225],
     horiz_y: [0; 21], horiz_o: [0; 21],
     verti_y: [0; 21], verti_o: [0; 21],
     diagr_y: [0; 21], diagr_o: [0; 21],
@@ -25,6 +29,7 @@ fn test__genpiece() {
 fn test_removepiece() {
   
 }
+
 
 
 

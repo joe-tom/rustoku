@@ -183,13 +183,13 @@ pub static DIAGR_ARRS:[[u8; 15]; 21] = [
 ];
 
 impl Board {
-  pub fn won (&self) -> u8 {
+  pub fn won (&self) -> i8 {
     unsafe {
       for i in 0..21usize {
-        if WON[self.verti_y[i] as usize] != 0 || WON[self.horiz_y[i] as usize] != 0 || WON[self.diagr_y[i] as usize] != 0  || WON[self.diagl_y[i] as usize] != 0{
+        if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) != 0 {
           return 1;
         }
-        if WON[self.verti_o[i] as usize] != 0 || WON[self.horiz_o[i] as usize] != 0 || WON[self.diagr_o[i] as usize] != 0  || WON[self.diagl_o[i] as usize] != 0{
+        if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) != 0 {
           return 2;
         }
       }
@@ -197,9 +197,6 @@ impl Board {
     return 0;
   }
   pub fn gen_moves (&self) -> Vec<(u8,u16)> {
-    if self.won() != 0 {
-      return vec![(self.won() ,0)];
-    }
     let mut movs:Vec<(u8,u8)> = vec![];
     unsafe {
       let mut i = 0usize;
@@ -345,7 +342,7 @@ impl Board {
               cur_mov = mov.0;
               cur_val = mov.1 as u16;
             } else  {
-              cur_val *= mov.1 as u16;
+              cur_val += mov.1 as u16;
             }
           }
           None => {
@@ -398,23 +395,21 @@ impl Board {
 
   pub unsafe fn place_horiz_you (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_y[mov.0] |= (1 << mov.1);}
   pub unsafe fn place_verti_you (&mut self, place: usize) {let mov = VERTI[place]; self.verti_y[mov.0] |= (1 << mov.1);}
-  pub unsafe fn place_horiz_opp (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_o[mov.0] |= (1 << mov.1);}
-  pub unsafe fn place_verti_opp (&mut self, place: usize) {let mov = VERTI[place]; self.verti_o[mov.0] |= (1 << mov.1);}
-
   pub unsafe fn remove_horiz_you (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_y[mov.0] ^= (1 << mov.1);}
   pub unsafe fn remove_verti_you (&mut self, place: usize) {let mov = VERTI[place]; self.verti_y[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn place_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;} self.diagl_y[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_diagr_you (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;} self.diagr_y[mov.0] |= (1 << mov.1);}
+  pub unsafe fn remove_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;} self.diagl_y[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_diagr_you (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;} self.diagr_y[mov.0] ^= (1 << mov.1);}
+
+  pub unsafe fn place_horiz_opp (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_o[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_verti_opp (&mut self, place: usize) {let mov = VERTI[place]; self.verti_o[mov.0] |= (1 << mov.1);}
   pub unsafe fn remove_horiz_opp (&mut self, place: usize) {let mov = HORIZ[place]; self.horiz_o[mov.0] ^= (1 << mov.1);}
   pub unsafe fn remove_verti_opp (&mut self, place: usize) {let mov = VERTI[place]; self.verti_o[mov.0] ^= (1 << mov.1);}
-
-  pub unsafe fn place_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_y[mov.0] |= (1 << mov.1);}
-  pub unsafe fn place_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_o[mov.0] |= (1 << mov.1);}
-  pub unsafe fn place_diagr_you (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_y[mov.0] |= (1 << mov.1);}
-  pub unsafe fn place_diagr_opp (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_o[mov.0] |= (1 << mov.1);}
-
-  pub unsafe fn remove_diagl_you (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_y[mov.0] ^= (1 << mov.1);}
-  pub unsafe fn remove_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;}self.diagl_o[mov.0] ^= (1 << mov.1);}
-  pub unsafe fn remove_diagr_you (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_y[mov.0] ^= (1 << mov.1);}
-  pub unsafe fn remove_diagr_opp (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;}self.diagr_o[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn place_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;} self.diagl_o[mov.0] |= (1 << mov.1);}
+  pub unsafe fn place_diagr_opp (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;} self.diagr_o[mov.0] |= (1 << mov.1);}
+  pub unsafe fn remove_diagl_opp (&mut self, place: usize) {let mov = DIAGL[place]; if mov.0 == NO {return;} self.diagl_o[mov.0] ^= (1 << mov.1);}
+  pub unsafe fn remove_diagr_opp (&mut self, place: usize) {let mov = DIAGR[place]; if mov.0 == NO {return;} self.diagr_o[mov.0] ^= (1 << mov.1);}
 }
 
 

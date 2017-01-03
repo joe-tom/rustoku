@@ -16,6 +16,15 @@ pub fn parse_board (board: String) -> super::board::Board{
     diagl_o: [0; 21]
   };
 
+  B.multi = [0; 225];
+  B.horiz_y = [0; 21];
+  B.horiz_o = [0; 21];
+  B.verti_y = [0; 21];
+  B.verti_o = [0; 21];
+  B.diagr_y = [0; 21];
+  B.diagr_o = [0; 21];
+  B.diagl_y = [0; 21];
+  B.diagl_o = [0; 21];
   let mut i = 0;
   loop {
     match squares.next() {

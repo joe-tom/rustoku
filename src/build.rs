@@ -8,6 +8,8 @@ use std::io::prelude::*;
 use std::mem;
 use std;
 
+use std::cmp;
+
 use std::thread;
 use std::time::Duration;
 
@@ -163,7 +165,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
 
   for mov in &you_movs {
     if mov.0 == cur_mov.0 {
-      cur_mov.1 += mov.1
+      cur_mov.1 = cmp::max(mov.1, cur_mov.1);
     } else {
       if first {
         real_movs.push(cur_mov);
@@ -203,7 +205,7 @@ fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
   let mut value = 0;
   match (movs.len() as u8) {
     1 => {
-      value = 100;
+      value = 200;
     },
     2 => {
       value = 20;
