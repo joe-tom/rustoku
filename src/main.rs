@@ -34,7 +34,7 @@ fn main () {
       unsafe {
         counter = 0;
       }
-      let moves = vec![minimax(&mut brd, 4, true, -20000, 20000, &mut Moves),(0,0),(0,0)];
+      let moves = next_best(&mut brd, 6, true, -20000, 20000, &mut Moves);
       println!("MOVES: {:?}", moves);
       println!("VALUES: {:?}", brd.gen_moves());
     }
@@ -50,10 +50,47 @@ use std::str;
 use std::string::String;
 
 /**
+ * Just a wrapper for the first level
+ */
+fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &mut HashMap<String, (u8,i32)>) -> Vec<(u8, i32)> {
+  let mut moves = brd.gen_moves();
+  let mut values = vec![];
+
+
+  let mut alpha = a;
+  let mut beta = b;
+
+  let mut v = -1;
+  for mov in moves {
+    if mov.1 <= THRESHOLD {
+      break;
+    }
+    brd.place_piece(mov.0 as usize, max);
+    let d_val = (minimax(brd, depth - 1, !max, alpha, beta, map));
+    brd.remove_piece(mov.0 as usize, max);
+    values.push((mov.0, d_val.1));
+    println!("DONE {:?}", (mov.0, d_val.1));
+    if d_val.1 == 20000 {
+      break;
+    }
+    if v < d_val.1 {
+      v = d_val.1;
+      alpha = cmp::max(alpha, v);
+      if beta <= alpha {
+        break;
+      }
+    }
+  }
+
+  values.sort_by(|a,b| (b.1).cmp(&a.1));
+  return values;
+}
+
+/**
  * The actual minimax function
  */
 
-const THRESHOLD: u16 = 5;
+const THRESHOLD: u16 = 2;
 static mut counter:u64 = 0;
 
 fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &mut HashMap<String, (u8,i32)>) -> (u8, i32) {
@@ -75,9 +112,9 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   let movs = brd.gen_moves();
   if depth == 0 {
     if max {
-      return (0, (movs[0].1 as i32));
-    } else {
       return (0, -(movs[0].1 as i32));
+    } else {
+      return (0, (movs[0].1 as i32));
     }
   }
 
