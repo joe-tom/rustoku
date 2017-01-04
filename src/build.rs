@@ -198,6 +198,8 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
 /**
  * Accepts a binary, returns a vector of tuples, with moves and urgency.
  */
+
+const LONGEST:[u8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
 fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
   let mut movs: Vec<u8> = vec![];
 
@@ -210,7 +212,7 @@ fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
     }
   }
 
-  let mut value = 0;
+  let mut value = 0;/*
   match (movs.len() as u8) {
     1 => {
       value = 200;
@@ -226,6 +228,8 @@ fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
     }
     _ => {}
   }
+  */
+  value = LONGEST[binary as usize];
 
 
   let mut mov_urg: Vec<(u8, u8, bool)> = vec![];
@@ -236,3 +240,5 @@ fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
 
   return mov_urg;
 }
+
+
