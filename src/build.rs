@@ -37,6 +37,7 @@ pub fn all () {
     println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
     for state in 0..65536{
       super::board::BT[state as usize] = u32::from_str_radix(&format!("{:b}", state),3).unwrap();
+      super::board::BT2[state as usize] = 2 * u32::from_str_radix(&format!("{:b}", state),3).unwrap();
     }
 
     // Build the Move and WON Table.
@@ -123,7 +124,7 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
  * Builds WON_TABLE and STATE_TABLE together
  */
 unsafe fn build_state(you: u16, opp: u16, state: usize) {
-  let mut you_movs: Vec<(u8, u8)> = vec![];
+  let mut you_movs: Vec<(u8, u8, bool)> = vec![];
 
   for shift in 0..15u16{
     let you_state = (you >> shift) & 0b11111;
@@ -133,7 +134,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
       continue;
     }
     if you_state == 0 {
-      let five_movs: Vec<(u8,u8)> = get_five(opp_state, shift);
+      let five_movs: Vec<(u8,u8, bool)> = get_five(opp_state, shift, true);
       let mut five_iter = five_movs.iter();
       loop {
         match five_iter.next() {
@@ -145,7 +146,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
       }
     }
     if opp_state == 0 {
-      let five_movs: Vec<(u8,u8)> = get_five(you_state, shift);
+      let five_movs: Vec<(u8,u8, bool)> = get_five(you_state, shift, false);
       let mut five_iter = five_movs.iter();
       loop {
         match five_iter.next() {
@@ -159,38 +160,45 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
   }
 
   you_movs.sort_by(|a,b| (a.0).cmp(&b.0));
+
   let mut real_movs: Vec<(u8, u8)> = vec![];
   let mut first = false;
   let mut cur_mov = (15,15);
+  let mut total_val = 0i32;
 
   for mov in &you_movs {
     if mov.0 == cur_mov.0 {
       cur_mov.1 += mov.1;
+      total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
     } else {
+      total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
       if first {
         real_movs.push(cur_mov);
-        cur_mov = *mov;
+        cur_mov = (mov.0, mov.1);
       }else {
         first = true;
-        cur_mov = *mov;
+        cur_mov = (mov.0, mov.1);
       }
     }
   }
+
   if first {
     real_movs.push(cur_mov);
   }
+
   let mut i:u8 = 0;
   for mov in &real_movs {
     super::board::MOVES[state][i as usize] = *mov;
     i += 1;
   }
+  super::board::VALUES[state] = total_val;
 }
 
 
 /**
  * Accepts a binary, returns a vector of tuples, with moves and urgency.
  */
-fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
+fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
   let mut movs: Vec<u8> = vec![];
 
   for shift in 0..5u16 {
@@ -220,10 +228,10 @@ fn get_five(binary: u16, cur_shift: u16) -> Vec<(u8, u8)>{
   }
 
 
-  let mut mov_urg: Vec<(u8, u8)> = vec![];
+  let mut mov_urg: Vec<(u8, u8, bool)> = vec![];
 
   for mov in &movs {
-    mov_urg.push((*mov, value));
+    mov_urg.push((*mov, value, you));
   }
 
   return mov_urg;

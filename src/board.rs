@@ -1,8 +1,10 @@
 // The array that allows binary to ternary conversion
 pub static mut BT: [u32; 65536] = [0; 65536];
+pub static mut BT2: [u32; 65536] = [0; 65536];
 
 // The arrays for move lookup
 pub static mut MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
+pub static mut VALUES: [i32; 14348907] = [0; 14348907];
 
 // The array for win lookup
 pub static mut WON: [u8; 65536] = [0; 65536]; 
@@ -183,7 +185,21 @@ pub static DIAGR_ARRS:[[u8; 15]; 21] = [
 ];
 
 impl Board {
-  pub fn won (&self) -> i32 {
+  pub fn evaluate (&self) -> i32 {
+    let mut value = 0;
+    unsafe {
+      for i in 0..21usize {
+        value += VALUES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize];
+      }
+    }
+
+    return value;
+  }
+
+  pub fn won (&self, you: bool) -> i32 {
     unsafe {
       for i in 0..21usize {
         if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) != 0 {
@@ -213,10 +229,10 @@ impl Board {
         let mut l_done = true;
         let mut r_done = true;
 
-        let mut v_state = MOVES[((2 * BT[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
-        let mut h_state = MOVES[((2 * BT[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
-        let mut l_state = MOVES[((2 * BT[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize].iter();
-        let mut r_state = MOVES[((2 * BT[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize].iter();
+        let mut v_state = MOVES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
+        let mut h_state = MOVES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
+        let mut l_state = MOVES[((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize].iter();
+        let mut r_state = MOVES[((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize].iter();
 
         if i < 15 {
 

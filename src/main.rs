@@ -34,9 +34,10 @@ fn main () {
       unsafe {
         counter = 0;
       }
-      let moves = next_best(&mut brd, 6, true, -20000, 20000, &mut Moves);
-      println!("MOVES: {:?}", moves);
+      println!("VALUE: {:?}", brd.evaluate());
       println!("VALUES: {:?}", brd.gen_moves());
+      let moves = next_best(&mut brd, 10, true, -20000, 20000, &mut Moves);
+      println!("MOVES: {:?}", moves);
     }
   }
 }
@@ -83,27 +84,31 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
   }
 
   values.sort_by(|a,b| (b.1).cmp(&a.1));
-  return values;
+  if values.len() == 0 {
+    return brd.gen_moves().iter().map(|x| (x.0,x.1 as i32)).collect();
+  } else {
+    return values;
+  }
 }
 
 /**
  * The actual minimax function
  */
 
-const THRESHOLD: u16 = 2;
+const THRESHOLD: u16 = 8;
 static mut counter:u64 = 0;
 
 fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &mut HashMap<String, (u8,i32)>) -> (u8, i32) {
 
   unsafe {
     counter += 1;
-    if counter % 100000 == 0{
-      let vals = (counter / 1000);
-      println!("WE'VE EVALUATED {:?}k NODES", vals);
+    if counter % 1000000 == 0{
+      let vals = (counter / 1000000);
+      println!("WE'VE EVALUATED {:?}M NODES", vals);
     }
   }
 
-  let val = brd.won();
+  let val = brd.won(max);
   
   if val != 0 {
     return (0, val);
@@ -111,11 +116,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
 
   let movs = brd.gen_moves();
   if depth == 0 {
-    if max {
-      return (0, -(movs[0].1 as i32));
-    } else {
-      return (0, (movs[0].1 as i32));
-    }
+    return (0,brd.evaluate());
   }
 
   let brd_str: String = brd.multi.iter().cloned().collect();
@@ -137,9 +138,9 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
       }
       brd.place_piece(mov.0 as usize, max);
       let d_val = (minimax(brd, depth - 1, !max, alpha, beta, map));
-      brd.remove_piece(mov.0 as usize, max);
       let brd_str: String = brd.multi.iter().cloned().collect();
       map.insert(brd_str, d_val);
+      brd.remove_piece(mov.0 as usize, max);
       
       if v < d_val.1 {
         v = d_val.1;

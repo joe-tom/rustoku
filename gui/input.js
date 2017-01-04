@@ -56,6 +56,9 @@ function parse(data) {
       })
       console.log(arr)
     break
+    case 'VALUE':
+      console.log('Board value is ',things[1])
+    break
   }
 
 
