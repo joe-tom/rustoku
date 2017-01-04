@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::str;
 use std::string::String;
-
+/*
 #[bench]
 fn hash_vec(b: &mut test::Bencher) {
   let mut map: HashMap<String,u8> = HashMap::new();
@@ -26,4 +26,11 @@ fn hash_vec_now(b: &mut test::Bencher) {
     let s = test::black_box(String::from_utf8(v.clone()).unwrap());
     map.insert(s, test::black_box(123));
   })
+}
+
+*/
+
+#[bench]
+fn pointer(b: &mut test::Bencher) {
+  
 }

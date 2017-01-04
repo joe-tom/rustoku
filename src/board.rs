@@ -201,12 +201,23 @@ impl Board {
 
   pub fn won (&self, you: bool) -> i32 {
     unsafe {
-      for i in 0..21usize {
-        if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) != 0 {
-          return 20000;
+      if you {
+        for i in 0..21usize {
+          if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) != 0 {
+            return 20000;
+          }
+          if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) == 1 {
+            return -20000;
+          }
         }
-        if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) != 0 {
-          return -20000;
+      } else {
+        for i in 0..21usize {
+          if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) == 1 {
+            return 20000;
+          }
+          if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) != 0 {
+            return -20000;
+          }
         }
       }
     }
@@ -370,8 +381,28 @@ impl Board {
     
       real_movs[0] = (cur_mov, cur_val);
     }
+
+
     
     real_movs.sort_by(|a,b| (b.1).cmp(&a.1));
+    real_movs.truncate(super::MAX_MOVES);
+    return real_movs;
+    
+    let mut i:usize = 0;
+
+    for mov in real_movs.clone() {
+      if mov.1 <= super::THRESHOLD {
+        if i <= super::MAX_MOVES {
+          real_movs.truncate(super::MAX_MOVES);
+          return real_movs;
+        } else {
+          real_movs.truncate(i);
+          return real_movs;
+        }
+      }
+      i += 1;
+    }
+
     return real_movs;
   }
 

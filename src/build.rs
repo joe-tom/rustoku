@@ -13,6 +13,9 @@ use std::cmp;
 use std::thread;
 use std::time::Duration;
 
+const THREE_VALUE: u8 = 100;
+const FOUR_VALUE: u8 = 250;
+const FOUR_STATE: i32 = 10000;
 
 pub static mut counter:u32 = 0;
 static mut tf:[u8; 430467210] = [0; 430467210];
@@ -144,8 +147,8 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     if you_state == 0 {
       let five_movs: Vec<(u8,u8, bool)> = get_five(opp_state, shift, true);
       if LENGTH[opp_state as usize] == 4 {
-        super::board::MOVES[state][0] = (five_movs[0].0, 250);
-        super::board::VALUES[state] = -250;
+        super::board::MOVES[state][0] = (five_movs[0].0, FOUR_VALUE);
+        super::board::VALUES[state] = -FOUR_STATE;
         return;
       }
       let mut five_iter = five_movs.iter();
@@ -161,8 +164,8 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     if opp_state == 0 {
       let five_movs: Vec<(u8,u8, bool)> = get_five(you_state, shift, false);
       if LENGTH[you_state as usize] == 4 {
-        super::board::MOVES[state][0] = (five_movs[0].0, 250);
-        super::board::VALUES[state] = 250;
+        super::board::MOVES[state][0] = (five_movs[0].0, FOUR_VALUE);
+        super::board::VALUES[state] = FOUR_STATE;
         return;
       }
       let mut five_iter = five_movs.iter();
@@ -177,39 +180,56 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     }
   }
 
-  you_movs.sort_by(|a,b| (a.0).cmp(&b.0));
-
-  let mut real_movs: Vec<(u8, u8)> = vec![];
-  let mut first = false;
-  let mut cur_mov = (15,15);
   let mut total_val = 0i32;
+  you_movs.sort_by(|a,b| (a.1).cmp(&b.1));
+  /*** FINISH HERE!!*/
+  if you_movs.len() == 0 {
+    return;
+  }
+  if you_movs[0].1 == 3 {
+    let mut i = 0;
+    for mov in you_movs {
+      if mov.1 < 3 {
+        return;
+      }
+      super::board::MOVES[state][i as usize] = (mov.0, THREE_VALUE);
+      super::board::VALUES[state] += (THREE_VALUE as i32 / 2);
+      i += 1;
+    }
+  } else {
+    you_movs.sort_by(|a,b| (a.0).cmp(&b.0));
 
-  for mov in &you_movs {
-    if mov.0 == cur_mov.0 {
-      cur_mov.1 += mov.1;
-      total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
-    } else {
-      total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
-      if first {
-        real_movs.push(cur_mov);
-        cur_mov = (mov.0, mov.1);
-      }else {
-        first = true;
-        cur_mov = (mov.0, mov.1);
+    let mut real_movs: Vec<(u8, u8)> = vec![];
+    let mut first = false;
+    let mut cur_mov = (15,15);
+
+    for mov in &you_movs {
+      if mov.0 == cur_mov.0 {
+        cur_mov.1 += mov.1;
+        total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
+      } else {
+        total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
+        if first {
+          real_movs.push(cur_mov);
+          cur_mov = (mov.0, mov.1);
+        }else {
+          first = true;
+          cur_mov = (mov.0, mov.1);
+        }
       }
     }
-  }
 
-  if first {
-    real_movs.push(cur_mov);
-  }
+    if first {
+      real_movs.push(cur_mov);
+    }
 
-  let mut i:u8 = 0;
-  for mov in &real_movs {
-    super::board::MOVES[state][i as usize] = *mov;
-    i += 1;
+    let mut i:u8 = 0;
+    for mov in &real_movs {
+      super::board::MOVES[state][i as usize] = *mov;
+      i += 1;
+    }
+    super::board::VALUES[state] = total_val;
   }
-  super::board::VALUES[state] = total_val;
 }
 
 
@@ -219,6 +239,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
 
 const LONGEST:[u8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
 const LENGTH:[u8; 32] = [0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5];
+
 fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
   let mut movs: Vec<u8> = vec![];
 
