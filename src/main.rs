@@ -36,7 +36,7 @@ fn main () {
       }
       println!("VALUE: {:?}", brd.evaluate());
       println!("VALUES: {:?}", brd.gen_moves());
-      let moves = next_best(&mut brd, 10, true, -20000, 20000, &mut Moves);
+      let moves = next_best(&mut brd, 6, true, -20000, 20000, &mut Moves);
       println!("MOVES: {:?}", moves);
     }
   }
@@ -63,7 +63,7 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
 
   let mut v = -1;
   for mov in moves {
-    if mov.1 <= (80 - (depth as u16 * 10)) {
+    if mov.1 <= THRESHOLD{
       break;
     }
     brd.place_piece(mov.0 as usize, max);
@@ -95,7 +95,7 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
  * The actual minimax function
  */
 
-const THRESHOLD: u16 = 10;
+const THRESHOLD: u16 = 1;
 static mut counter:u64 = 0;
 
 fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &mut HashMap<String, (u8,i32)>) -> (u8, i32) {
@@ -116,7 +116,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
 
   let movs = brd.gen_moves();
   if depth == 0 {
-    return (0,brd.evaluate());
+    return (0, brd.evaluate());
   }
 
   let brd_str: String = brd.multi.iter().cloned().collect();
@@ -133,7 +133,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   if max {
     let mut v = -20000;
     for mov in &movs {
-      if mov.1 <= (80 - (depth as u16 * 10)) {
+      if mov.1 <= THRESHOLD{
         break;
       }
       brd.place_piece(mov.0 as usize, max);
@@ -157,7 +157,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   } else {
     let mut v = 20000;
     for mov in &movs {
-      if mov.1 <= (80 - (depth as u16 * 10)) {
+      if mov.1 <= THRESHOLD{
         break;
       }
       brd.place_piece(mov.0 as usize, max);

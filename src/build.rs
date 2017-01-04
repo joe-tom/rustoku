@@ -30,6 +30,14 @@ pub fn all () {
           super::board::WON[state as usize] = 1;
           break;
         }
+        if (state >> shift) & 0b11110 == 0b11110 {
+          super::board::WON[state as usize] = 2;
+          break;
+        }
+        if (state >> shift) & 0b11011 == 0b01111 {
+          super::board::WON[state as usize] = 2;
+          break;
+        }
       }
     }
 
@@ -135,6 +143,11 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     }
     if you_state == 0 {
       let five_movs: Vec<(u8,u8, bool)> = get_five(opp_state, shift, true);
+      if LENGTH[opp_state as usize] == 4 {
+        super::board::MOVES[state][0] = (five_movs[0].0, 250);
+        super::board::VALUES[state] = -250;
+        return;
+      }
       let mut five_iter = five_movs.iter();
       loop {
         match five_iter.next() {
@@ -147,6 +160,11 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     }
     if opp_state == 0 {
       let five_movs: Vec<(u8,u8, bool)> = get_five(you_state, shift, false);
+      if LENGTH[you_state as usize] == 4 {
+        super::board::MOVES[state][0] = (five_movs[0].0, 250);
+        super::board::VALUES[state] = 250;
+        return;
+      }
       let mut five_iter = five_movs.iter();
       loop {
         match five_iter.next() {
@@ -200,6 +218,7 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
  */
 
 const LONGEST:[u8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
+const LENGTH:[u8; 32] = [0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5];
 fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
   let mut movs: Vec<u8> = vec![];
 
