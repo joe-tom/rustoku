@@ -9,6 +9,13 @@ pub static mut VALUES: [i32; 14348907] = [0; 14348907];
 // The array for win lookup
 pub static mut WON: [u8; 65536] = [0; 65536]; 
 
+// List of constants
+pub const FIVE_FLAG = 0b10;
+pub const FOUR_FLAG = 0b01;
+
+pub const YOU_WON = 20000;
+pub const OPP_WON = -20000;
+
 pub struct Board {
   pub multi: [char; 225],
 
@@ -201,22 +208,48 @@ impl Board {
 
   pub fn won (&self, you: bool) -> i32 {
     unsafe {
+      let mut four_count = 0;
+
       if you {
         for i in 0..21usize {
-          if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) != 0 {
-            return 20000;
+          let val_y = (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]);
+          let val_o = (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]);
+          
+          // Check for double four
+          if val_o & FOUR_FLAG != 0 && four_count == 1{
+            return OPP_WON;
+          } else if val_o & FOUR_FLAG != 0 {
+            four_count += 1;
           }
-          if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) == 1 {
-            return -20000;
+          if val_y & FOUR_FLAG != 0 {
+            return YOU_WON;
+          }
+          if val_y & FIVE_FLAG != 0 {
+            return YOU_WON;
+          }
+          if val_o & FIVE_FLAG != 0 {
+            return OPP_WON;
           }
         }
       } else {
         for i in 0..21usize {
-          if (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]) == 1 {
-            return 20000;
+          let val_y = (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]);
+          let val_o = (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]);
+
+          // Check for double four
+          if val_y & FOUR_FLAG != 0 && four_count == 1{
+            return YOU_WON;
+          } else if val_y & FOUR_FLAG != 0 {
+            four_count += 1;
           }
-          if (WON[self.verti_o[i] as usize] | WON[self.horiz_o[i] as usize] | WON[self.diagr_o[i] as usize] | WON[self.diagl_o[i] as usize]) != 0 {
-            return -20000;
+          if val_o & FOUR_FLAG != 0 {
+            return YOU_WON;
+          }
+          if val_o & FIVE_FLAG != 0 {
+            return OPP_WON;
+          }
+          if val_y & FIVE_FLAG != 0 {
+            return YOU_WON;
           }
         }
       }

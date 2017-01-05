@@ -28,18 +28,18 @@ pub fn all () {
 
     println!("COMMENT: BUILDING WON TABLE");
     for state in 0..65536 {
-      for shift in 0..12 {
+      for shift in 0..11 {
         if (state >> shift) & 0b11111 == 0b11111 {
-          super::board::WON[state as usize] = 1;
+          super::board::WON[state as usize] = super::board::FIVE_FLAG;
           break;
         }
-        if (state >> shift) & 0b11110 == 0b11110 {
-          super::board::WON[state as usize] = 2;
-          break;
+
+        // Don't break out of these, because it's possible a five could exist in the same line.
+        if (state >> shift) & 0b11111 == 0b11110 && shift != 10 {
+          super::board::WON[state as usize] = super::board::FOUR_FLAG;
         }
-        if (state >> shift) & 0b11011 == 0b01111 {
-          super::board::WON[state as usize] = 2;
-          break;
+        if (state >> shift) & 0b11111 == 0b01111 && shift != 0 {
+          super::board::WON[state as usize] = super::board::FOUR_FLAG;
         }
       }
     }
@@ -134,6 +134,30 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
 /**
  * Builds WON_TABLE and STATE_TABLE together
  */
+// There are 11 places to check.
+unsafe fn build_state(you: u16, opp: u16, state: usize) {
+  let mut checking_3_y = false;
+  let mut checking_3_o = false;
+
+  let mut i = 0;
+  while i < 11 {
+    let you_state = you >> i & 0b11111;
+    let opp_state = opp >> i & 0b11111;
+
+    /* This is for you */
+    // First check for fours.
+    if opp_state == 0 {
+      if you_state == 0b11111 {
+        
+      }
+    }
+    /* This is for opp */
+
+    i += 1;
+  }
+}
+
+/*
 unsafe fn build_state(you: u16, opp: u16, state: usize) {
   let mut you_movs: Vec<(u8, u8, bool)> = vec![];
 
@@ -282,3 +306,4 @@ fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
 }
 
 
+*/
