@@ -94,8 +94,8 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
 /**
  * The actual minimax function
  */
-pub const DEPTH: u8 = 10;
-pub const THRESHOLD: u16 = 4;
+pub const DEPTH: u8 = 4;
+pub const THRESHOLD: i16 = 4;
 pub const MAX_MOVES: usize = 5;
 
 static mut Counter:u64 = 0;
@@ -121,10 +121,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   }
   let movs = brd.gen_moves();
   
-  if movs[0].1 <= THRESHOLD {
-    return (0, brd.evaluate());
-  }
-
+  
   let brd_str: String = brd.multi.iter().cloned().collect();
   match map.get(&brd_str) {
     Some(value) => {unsafe{Hits += 1;}return *value;}
