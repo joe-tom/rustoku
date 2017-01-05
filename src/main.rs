@@ -119,6 +119,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   if depth >= DEPTH {
     return (0, brd.evaluate());
   }
+
   let movs = brd.gen_moves();
   
   
@@ -136,6 +137,9 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   if max {
     let mut v = -20000;
     for mov in &movs {
+      if mov.1.abs() <= THRESHOLD {
+        break;
+      }
       brd.place_piece(mov.0 as usize, max);
       let d_val = (minimax(brd, depth + 1, !max, alpha, beta, map));
       let brd_str: String = brd.multi.iter().cloned().collect();
@@ -157,6 +161,9 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   } else {
     let mut v = 20000;
     for mov in &movs {
+      if mov.1.abs() <= THRESHOLD {
+        break;
+      }
       brd.place_piece(mov.0 as usize, max);
       let d_val = (minimax(brd, depth + 1, !max, alpha, beta,  map));
       brd.remove_piece(mov.0 as usize, max);
