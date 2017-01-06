@@ -41,7 +41,7 @@ pub fn all () {
         }
         else if (state >> shift) & 0b11111 == 0b01111 && shift != 0 {
           super::board::WON[state as usize] |= super::board::FIVE_FLAG; shift += 5; continue;
-        }
+        }/*
         else if (state >> shift) & 0b11111 == 0b11101 {
           super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
         }
@@ -56,7 +56,7 @@ pub fn all () {
         }
         else if (state >> shift) & 0b11111 == 0b11110{
           super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
-        }
+        }*/
 
         shift += 1;
       }
@@ -86,7 +86,7 @@ pub fn all () {
     for t in threads {
       t.join();
     }
-    super::board::MOVES[0] = [(0,0);15];
+    super::board::MOVES[0] = [(0,0); 20];
   }
 }
 
@@ -134,35 +134,41 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
     }
   }
 
-  // Check for endpoint fours.
-  if (you & 0b111110000000000) == 0b111100000000000 && (opp & 0b111110000000000) == 0 {
-    super::board::MOVES[state][0] = (10, FOUR_VALUE);
-    super::board::VALUES[state] = -100000;
-    return;
-  }
-  if (opp & 0b111110000000000) == 0b111100000000000 && (you & 0b111110000000000) == 0 {
-    super::board::MOVES[state][0] = (10, -FOUR_VALUE);
-    super::board::VALUES[state] = -100000;
-    return;
-  }
   
-  // Check for starting fours
-  if (you & 0b11111) == 0b01111 && (opp & 0b11111) == 0 {
-    super::board::MOVES[state][0] = (4, FOUR_VALUE);
-    super::board::VALUES[state] = 100000;
-    return;
-  }
-  if (opp & 0b11111) == 0b01111 && (you & 0b11111) == 0 {
-    super::board::MOVES[state][0] = (4, -FOUR_VALUE);
-    super::board::VALUES[state] = -100000;
-    return;
-  }
 
   let mut i = 0;
   while i < 15 {
     let you_state = (you >> i) & 0b11111;
     let opp_state = (opp >> i) & 0b11111;
 
+
+      // Check for starting fours
+      if you_state == 0b11110 && opp_state == 0 && i <= 10 {
+        super::board::MOVES[state][0] = (i, FOUR_VALUE);
+        super::board::VALUES[0][state] = 100000;
+        super::board::VALUES[1][state] = 100000;
+        return;
+      }
+      if opp_state == 0b11110 && you_state == 0 && i <= 10 {
+        super::board::MOVES[state][0] = (i, -FOUR_VALUE);
+        super::board::VALUES[0][state] = -100000;
+        super::board::VALUES[1][state] = -100000;
+        return;
+      }
+
+      // Check for starting fours
+      if you_state == 0b01111 && opp_state == 0 && i <= 10 {
+        super::board::MOVES[state][0] = (i + 4, FOUR_VALUE);
+        super::board::VALUES[0][state] = 100000;
+        super::board::VALUES[1][state] = 100000;
+        return;
+      }
+      if opp_state == 0b01111 && you_state == 0 && i <= 10 {
+        super::board::MOVES[state][0] = (i + 4, -FOUR_VALUE);
+        super::board::VALUES[0][state] = -100000;
+        super::board::VALUES[1][state] = -100000;
+        return;
+      }
     /* This is for you */
     // First check for 3s.
     if opp_state == 0 && you_state == 0b01110 && i <= 10 {
@@ -204,27 +210,32 @@ unsafe fn build_state(you: u16, opp: u16, state: usize) {
   if real_movs.len() == 0 {
     return;
   }
-/*
-  let mut you_movs: Vec<(u8, i8)> = vec![];
-  real_movs.sort_by(|a,b| (a.0).cmp(&b.0));
-  let mut current = (real_movs[0].0, real_movs[0].1);
-  let mut i = 1;
-  while i < you_movs.len() {
-    let cur = real_movs[i];
-    if cur.0 == current.0 {
-      current.1 += cur.1;
-    } else {
-      you_movs.push(current);
-      current = cur;
-    }
-    i += 1;
-  }
-  you_movs.push(current);
-*/
-  real_movs.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
+
+  real_movs.sort_by(|a,b| (b.0).cmp(&a.0));
+  
+  let mut you_mov = vec![];
+  let mut value: i32 = 0;
   let mut i = 0;
-  for mov in real_movs {
-    if i == 14 {break;}
+
+  let a = real_movs.into_iter().fold((0,0i8 ), |cur, next| {
+    if cur.0 == next.0{
+      value += cur.1 as i32;
+      return (cur.0, (cur.1.abs() + next.1.abs()));
+    } else {
+      you_mov.push(cur);
+      value += next.1 as i32;
+      return (next.0, next.1.abs());
+    }
+  });
+  you_mov.push(a);
+  you_mov.remove(0);
+  you_mov.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
+
+  super::board::VALUES[0][state] = value;
+  super::board::VALUES[1][state] = value;
+
+  let mut i = 0;
+  for mov in you_mov {
     super::board::MOVES[state][i] = mov;
     i += 1;
   }

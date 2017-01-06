@@ -21,7 +21,7 @@ fn main () {
   println!("EVENT: READY!");
   // Start the loop to wait
   loop {
-    let mut Moves = HashMap::new();
+    //let mut Moves = HashMap::new();
     let mut buffer = String::new();
     let inp = stdin();
     let out = stdout();
@@ -29,15 +29,14 @@ fn main () {
     let mut handle = out.lock();
     for line in inp.lock().lines() {
       let val = line.unwrap() as String;  
-      println!("{:?}", val);
       let mut brd = input::parse_board(val);
       unsafe {
         Counter = 0;
       }
-      println!("VALUE: {:?}", brd.evaluate());
+      println!("VALUE: {:?}", brd.evaluate(true));
       println!("VALUES: {:?}", brd.gen_moves());
-      let moves = next_best(&mut brd, 0, true, -20000, 20000, &mut Moves);
-      println!("MOVES: {:?}", moves);
+      //let moves = next_best(&mut brd, 0, true, -20000, 20000, &mut Moves);
+      //println!("MOVES: {:?}", moves);
       unsafe {
         println!("HITS {:?}", Hits);
       }
@@ -94,7 +93,7 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
 /**
  * The actual minimax function
  */
-pub const DEPTH: u8 = 4;
+pub const DEPTH: u8 = 5;
 pub const THRESHOLD: i16 = 4;
 pub const MAX_MOVES: usize = 5;
 
@@ -117,7 +116,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
     return (0, val);
   }
   if depth >= DEPTH {
-    return (0, brd.evaluate());
+    return (0, brd.evaluate(max));
   }
 
   let movs = brd.gen_moves();
@@ -137,7 +136,7 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   if max {
     let mut v = -20000;
     for mov in &movs {
-      if mov.1.abs() <= THRESHOLD {
+      if mov.1.abs() < THRESHOLD + (depth as i16 - 1) {
         break;
       }
       brd.place_piece(mov.0 as usize, max);
@@ -161,14 +160,14 @@ fn minimax(brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &m
   } else {
     let mut v = 20000;
     for mov in &movs {
-      if mov.1.abs() <= THRESHOLD {
+      if mov.1.abs() <= THRESHOLD + (depth as i16 - 1) {
         break;
       }
       brd.place_piece(mov.0 as usize, max);
       let d_val = (minimax(brd, depth + 1, !max, alpha, beta,  map));
-      brd.remove_piece(mov.0 as usize, max);
       let brd_str: String = brd.multi.iter().cloned().collect();
       map.insert(brd_str, d_val);
+      brd.remove_piece(mov.0 as usize, max);
       
       if v > d_val.1 {
         v = d_val.1;

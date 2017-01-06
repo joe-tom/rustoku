@@ -3,8 +3,8 @@ pub static mut BT: [u32; 65536] = [0; 65536];
 pub static mut BT2: [u32; 65536] = [0; 65536];
 
 // The arrays for move lookup
-pub static mut MOVES: [[(u8,i8); 15]; 14348907] = [[(0,0); 15]; 14348907];
-pub static mut VALUES: [i32; 14348907] = [0; 14348907];
+pub static mut MOVES: [[(u8,i8); 20]; 14348907] = [[(0,0); 20]; 14348907];
+pub static mut VALUES: [[i32; 14348907]; 2] = [[0; 14348907]; 2];
 
 // The array for win lookup
 pub static mut WON: [u8; 65536] = [0; 65536]; 
@@ -192,14 +192,14 @@ pub static DIAGR_ARRS:[[u8; 15]; 21] = [
 ];
 
 impl Board {
-  pub fn evaluate (&self) -> i32 {
+  pub fn evaluate (&self, you: bool) -> i32 {
     let mut value = 0;
     unsafe {
       for i in 0..21usize {
-        value += VALUES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize];
-        value += VALUES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize];
-        value += VALUES[((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize];
-        value += VALUES[((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize];
+        value += VALUES[0][((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize];
+        value += VALUES[0][((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize];
+        value += VALUES[0][((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize];
+        value += VALUES[0][((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize];
       }
     }
 
@@ -224,7 +224,7 @@ impl Board {
           if val_o & FOUR_FLAG != 0 { four_count += 1;}
         }
 
-        if four_count > 0 {
+        if four_count > 1 {
           return OPP_WON;
         }
       } else {
@@ -241,14 +241,14 @@ impl Board {
           if val_y & FOUR_FLAG != 0 { four_count += 1;}
         }
 
-        if four_count > 0 {
+        if four_count > 1 {
           return YOU_WON;
         }
       }
     }
     return 0;
   }
-/*
+
   pub fn gen_moves (&mut self) ->  Vec<(u8, i16)>{
       
     let mut movs: Vec<(u8, i8)> = vec![];
@@ -271,76 +271,42 @@ impl Board {
           let mut v_state = MOVES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
           let mut h_state = MOVES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
 
-          while v_more && h_more && l_more && r_more {
+          while v_more || h_more || l_more || r_more {
             if v_more {
-              println!("{:?}", v_state.next());
               if let Some(v_val) = v_state.next() {
-                if v_val.1 == 0 { 
-                  v_more = false; 
-                } else {
-                  println!("{:?}", v_val);
-                  movs.push((VERTI_ARRS[i][14 - v_val.0 as usize], v_val.1)); 
-                }
+                if v_val.1 == 0 { v_more = false; } else { movs.push((VERTI_ARRS[i][14 - v_val.0 as usize], v_val.1)); }
               } else { v_more = false; }
             }
             if h_more {
               if let Some(h_val) = h_state.next() {
-                if h_val.1 == 0 { 
-                  h_more = false; 
-                } else { 
-                  movs.push((HORIZ_ARRS[i][14 - h_val.0 as usize], h_val.1)); 
-                }
+                if h_val.1 == 0 { h_more = false; } else { movs.push((HORIZ_ARRS[i][14 - h_val.0 as usize], h_val.1)); }
               } else { h_more = false; }
             }
             if l_more {
               if let Some(l_val) = l_state.next() {
                 let row = &DIAGL_ARRS[i];
-                if l_val.1 == 0{ 
-                  l_more = false; 
-                } else {
-                  if row[l_val.0 as usize] != NIL {
-                    movs.push((row[l_val.0 as usize], l_val.1));
-                  }
-                }
+                if l_val.1 == 0 { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
               } else { l_more = false; }
             }
             if r_more {
               if let Some(r_val) = r_state.next() {
                 let row = &DIAGR_ARRS[i];
-                if r_val.1 == 0{ 
-                  r_more = false; 
-                } else {
-                  if row[r_val.0 as usize] != NIL {
-                    movs.push((row[r_val.0 as usize], r_val.1));
-                  }
-                }
+                if r_val.1 == 0 { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
               }
             } else { r_more = false; }
           }
         } else {
-          while l_more && r_more {
+          while l_more || r_more {
             if l_more {
               if let Some(l_val) = l_state.next() {
                 let row = &DIAGL_ARRS[i];
-                if l_val.1 == 0{ 
-                  l_more = false; 
-                } else {
-                  if row[l_val.0 as usize] != NIL {
-                    movs.push((row[l_val.0 as usize], l_val.1));
-                  }
-                }
+                if l_val.1 == 0{ l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
               } else { l_more = false; }
             }
             if r_more {
               if let Some(r_val) = r_state.next() {
                 let row = &DIAGR_ARRS[i];
-                if r_val.1 == 0{ 
-                  r_more = false; 
-                } else {
-                  if row[r_val.0 as usize] != NIL {
-                    movs.push((row[r_val.0 as usize], r_val.1));
-                  }
-                }
+                if r_val.1 == 0{ r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
               }
             } else { r_more = false; }
           }
@@ -350,231 +316,8 @@ impl Board {
         i += 1;
       }
     }
-    println!("{:?}", movs);
+
     return movs.into_iter().map(|x| (x.0, x.1 as i16)).collect();
-  }*/
-
-  pub fn gen_moves (&self) -> Vec<(u8,i16)> {
-    let mut movs:Vec<(u8,i8)> = vec![];
-    unsafe {
-      let mut i = 0usize;
-      loop {
-
-        if i >= 21{
-          break;
-        }
-
-        
-        let mut h_done = true;
-        let mut v_done = true;
-        let mut l_done = true;
-        let mut r_done = true;
-
-        let mut v_state = MOVES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
-        let mut h_state = MOVES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
-        let mut l_state = MOVES[((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize].iter();
-        let mut r_state = MOVES[((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize].iter();
-
-        if i < 15 {
-
-          loop {
-            if v_done {
-              match v_state.next() {
-                Some(mov) => {
-                  if mov.1 == 0 {
-                    if !h_done && !l_done && !r_done {break;} v_done = false;
-                  } else {
-                    movs.push((VERTI_ARRS[i][14usize - mov.0 as usize], mov.1));
-                  }
-                }
-                None => {
-                  if !h_done && !l_done && !r_done { break;} v_done = false;
-                }
-              }
-            }
-            if h_done {
-              match h_state.next() {
-                Some(mov) => {
-                  if mov.1 == 0 {
-                    if !v_done && !l_done && !r_done{break;} h_done = false;
-                  } else {
-                    movs.push((HORIZ_ARRS[i][14usize - mov.0 as usize], mov.1));
-                  }
-                },
-                None => {
-                  if !v_done && !l_done && !r_done {break;} h_done = false;
-                },
-              }
-            }
-            if l_done {
-              match l_state.next() {
-                Some(mov) => {
-                  if mov.1 == 0 {
-                    if !v_done && !h_done && !r_done {break;} l_done = false;
-                  } else {
-                    let a = DIAGL_ARRS[i][mov.0 as usize];
-                    if a != NIL {
-                      movs.push((a, mov.1));
-                    }
-                  }
-                },
-                None => {
-                  if !v_done && !h_done && !r_done {break;} l_done = false;
-                },
-              }
-            }
-            if r_done {
-              match r_state.next() {
-                Some(mov) => {
-                  if mov.1 == 0 {
-                    if !v_done && !h_done && !l_done {break;} r_done = false;
-                  } else {
-                    let a = DIAGR_ARRS[i][mov.0 as usize];
-                    if a != NIL {
-                      movs.push((a, mov.1));
-                    }
-                  }
-                },
-                None => {
-                  if !v_done && !h_done && !l_done {break;} r_done = false;
-                },
-              }
-            }
-
-          }
-        } else {
-          loop {
-            match l_state.next() {
-              Some(mov) => {
-                if mov.1 == 0 {
-                  if !r_done {break;} l_done = false;
-                } else {
-                  let a = DIAGL_ARRS[i][mov.0 as usize];
-                  if a != NIL {
-                    movs.push((a, mov.1));
-                  }
-                }
-              },
-              None => {
-                if !r_done {break;} l_done = false;
-              },
-            }
-            match r_state.next() {
-              Some(mov) => {
-                if mov.1 == 0 {
-                  if !l_done {break;} r_done = false;
-                } else {
-                  let a = DIAGR_ARRS[i][mov.0 as usize];
-                  if a != NIL {
-                    movs.push((a, mov.1));
-                  }
-                }
-              },
-              None => {
-                if !l_done {break;} r_done = false;
-              },
-            }
-          }
-        }
-
-        i += 1;
-      }
-    }
-
-    let mut real_movs: Vec<(u8, i16)> = vec![];
-
-    movs.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
-
-    let mut cur_mov = 0;
-    let mut cur_val: i16 = 0;
-
-    if movs[0].1.abs() ==  super::build::THREE_VALUE {
-      let mut i = 1;
-      while movs[i].1.abs() == super::build::THREE_VALUE {
-        i += 1;
-      }
-      movs.truncate(i);
-      return movs.into_iter().map(|x| (x.0, x.1 as i16)).collect();
-    } else {
-      movs.sort_by(|a,b| (b.0).cmp(&a.0));
-
-      let mut cur_mov = movs[0].0;
-      let mut cur_val = movs[0].1 as i16;
-
-      let mut i = 1;
-      while i < movs.len() {
-        let cur = movs[i];
-
-        if cur.0 == cur_mov {
-          cur_val += cur.1 as i16;
-        } else {
-          real_movs.push((cur_mov, cur_val));
-          cur_mov = cur.0;
-          cur_val = cur.1 as i16;
-        }
-
-        i += 1;
-      }
-
-      real_movs.push((cur_mov, cur_val));
-      real_movs.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
-
-      return real_movs;
-    }
-
-    /*let mut real_movs: Vec<(u8, i8)> = vec![];
-    if movs.len() == 1 {
-      real_movs.push((movs[0].0,movs[0].1 as i8));
-    }
-    else if movs.len() > 0 {
-      movs.sort_by(|a,b| (a.0).cmp(&b.0));
-      let mut mov_iter = movs.into_iter();
-
-      let mut cur_val = 0;
-      let mut cur_mov = 0;
-
-      loop {
-        match mov_iter.next() {
-          Some(mov) => {
-            if mov.0 != cur_mov {
-              real_movs.push((cur_mov, cur_val));
-              cur_mov = mov.0;
-              cur_val = mov.1 as i8;
-            } else  {
-              cur_val += mov.1 as i8;
-            }
-          }
-          None => {
-            break;
-          }
-        }
-      }
-    
-      real_movs[0] = (cur_mov, cur_val);
-    }
-
-*/
-    
-    //return movs.into_iter().map(|x| (x.0, x.1 as i16)).collect();
-    /*
-    real_movs.truncate(super::MAX_MOVES);
-    return real_movs;
-    
-    let mut i:usize = 0;
-
-    for mov in real_movs.clone() {
-      if mov.1 <= super::THRESHOLD {
-        if i <= super::MAX_MOVES {
-          real_movs.truncate(super::MAX_MOVES);
-          return real_movs;
-        } else {
-          real_movs.truncate(i);
-          return real_movs;
-        }
-      }
-      i += 1;
-    }*/
-
   }
 
   pub fn place_piece (&mut self, place: usize, you: bool) {
@@ -879,3 +622,232 @@ impl Board {
     return real_movs;
   }
  */
+
+
+
+
+
+
+
+
+
+
+
+/*
+  pub fn gen_moves (&self) -> Vec<(u8,i16)> {
+    let mut movs:Vec<(u8,i8)> = vec![];
+    unsafe {
+      let mut i = 0usize;
+      loop {
+
+        if i >= 21{
+          break;
+        }
+
+        
+        let mut h_done = true;
+        let mut v_done = true;
+        let mut l_done = true;
+        let mut r_done = true;
+
+        let mut v_state = MOVES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize].iter();
+        let mut h_state = MOVES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize].iter();
+        let mut l_state = MOVES[((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize].iter();
+        let mut r_state = MOVES[((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize].iter();
+
+        if i < 15 {
+
+          loop {
+            if v_done {
+              match v_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !h_done && !l_done && !r_done {break;} v_done = false;
+                  } else {
+                    movs.push((VERTI_ARRS[i][14usize - mov.0 as usize], mov.1));
+                  }
+                }
+                None => {
+                  if !h_done && !l_done && !r_done { break;} v_done = false;
+                }
+              }
+            }
+            if h_done {
+              match h_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !v_done && !l_done && !r_done{break;} h_done = false;
+                  } else {
+                    movs.push((HORIZ_ARRS[i][14usize - mov.0 as usize], mov.1));
+                  }
+                },
+                None => {
+                  if !v_done && !l_done && !r_done {break;} h_done = false;
+                },
+              }
+            }
+            if l_done {
+              match l_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !v_done && !h_done && !r_done {break;} l_done = false;
+                  } else {
+                    let a = DIAGL_ARRS[i][mov.0 as usize];
+                    if a != NIL {
+                      movs.push((a, mov.1));
+                    }
+                  }
+                },
+                None => {
+                  if !v_done && !h_done && !r_done {break;} l_done = false;
+                },
+              }
+            }
+            if r_done {
+              match r_state.next() {
+                Some(mov) => {
+                  if mov.1 == 0 {
+                    if !v_done && !h_done && !l_done {break;} r_done = false;
+                  } else {
+                    let a = DIAGR_ARRS[i][mov.0 as usize];
+                    if a != NIL {
+                      movs.push((a, mov.1));
+                    }
+                  }
+                },
+                None => {
+                  if !v_done && !h_done && !l_done {break;} r_done = false;
+                },
+              }
+            }
+
+          }
+        } else {
+          loop {
+            match l_state.next() {
+              Some(mov) => {
+                if mov.1 == 0 {
+                  if !r_done {break;} l_done = false;
+                } else {
+                  let a = DIAGL_ARRS[i][mov.0 as usize];
+                  if a != NIL {
+                    movs.push((a, mov.1));
+                  }
+                }
+              },
+              None => {
+                if !r_done {break;} l_done = false;
+              },
+            }
+            match r_state.next() {
+              Some(mov) => {
+                if mov.1 == 0 {
+                  if !l_done {break;} r_done = false;
+                } else {
+                  let a = DIAGR_ARRS[i][mov.0 as usize];
+                  if a != NIL {
+                    movs.push((a, mov.1));
+                  }
+                }
+              },
+              None => {
+                if !l_done {break;} r_done = false;
+              },
+            }
+          }
+        }
+
+        i += 1;
+      }
+    }
+
+    let mut real_movs: Vec<(u8, i16)> = vec![];
+
+    movs.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
+
+    let mut cur_mov = 0;
+    let mut cur_val: i16 = 0;
+
+      movs.sort_by(|a,b| (b.0).cmp(&a.0));
+    if movs.len() == 0 {
+      return vec![];
+    }
+      let mut cur_mov = movs[0].0;
+      let mut cur_val = movs[0].1.abs() as i16;
+
+      let mut i = 1;
+      while i < movs.len() {
+        let cur = movs[i];
+
+        if cur.0 == cur_mov {
+          cur_val += cur.1 as i16;
+        } else {
+          real_movs.push((cur_mov, cur_val.abs()));
+          cur_mov = cur.0;
+          cur_val = cur.1 as i16;
+        }
+
+        i += 1;
+      }
+
+      real_movs.push((cur_mov, cur_val));
+      real_movs.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
+
+      return real_movs;
+    
+
+    /*let mut real_movs: Vec<(u8, i8)> = vec![];
+    if movs.len() == 1 {
+      real_movs.push((movs[0].0,movs[0].1 as i8));
+    }
+    else if movs.len() > 0 {
+      movs.sort_by(|a,b| (a.0).cmp(&b.0));
+      let mut mov_iter = movs.into_iter();
+
+      let mut cur_val = 0;
+      let mut cur_mov = 0;
+
+      loop {
+        match mov_iter.next() {
+          Some(mov) => {
+            if mov.0 != cur_mov {
+              real_movs.push((cur_mov, cur_val));
+              cur_mov = mov.0;
+              cur_val = mov.1 as i8;
+            } else  {
+              cur_val += mov.1 as i8;
+            }
+          }
+          None => {
+            break;
+          }
+        }
+      }
+    
+      real_movs[0] = (cur_mov, cur_val);
+    }
+
+*/
+    
+    //return movs.into_iter().map(|x| (x.0, x.1 as i16)).collect();
+    /*
+    real_movs.truncate(super::MAX_MOVES);
+    return real_movs;
+    
+    let mut i:usize = 0;
+
+    for mov in real_movs.clone() {
+      if mov.1 <= super::THRESHOLD {
+        if i <= super::MAX_MOVES {
+          real_movs.truncate(super::MAX_MOVES);
+          return real_movs;
+        } else {
+          real_movs.truncate(i);
+          return real_movs;
+        }
+      }
+      i += 1;
+    }*/
+
+  }
+  */

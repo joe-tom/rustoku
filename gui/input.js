@@ -49,6 +49,9 @@ function parse(data) {
       Board.$data.squares[arr[0]].evaluated = true
     break
     case 'VALUES':
+      Board.$data.squares.forEach((sq) => {
+        sq.value = ''
+      })
       var arr = things[1].replace(/\(/g,'[').replace(/\)/g,']')
       JSON.parse(arr).filter(tup => tup[1] != 0).forEach((i) => {
         Board.$data.squares[i[0]].value = i[1]
