@@ -4,5 +4,9 @@ version = "0.1.0"
 authors = ["Joseph Thomas <josepht404@gmail.com>"]
 
 [dependencies]
-time = "0.1"
-rand="0.3.0"
+concurrent-hashmap = "0.2.2"
+
+
+[depdencies.concurrent-hashmap]
+version = "0.2.1"
+default-features = false

@@ -1,9 +1,11 @@
+
 use std::boxed::Box;
 use std::fs::File;
 use std::io::Write;
 use std::io::Read;
 use std::io::{self, BufReader};
 use std::io::prelude::*;
+use std::collections::HashMap;
 
 use std::mem;
 use std;
@@ -11,14 +13,19 @@ use std;
 use std::cmp;
 
 use std::thread;
-use std::time::Duration;
+//use std::time::Duration;
+
 
 pub const THREE_VALUE: i8 = 63;
 pub const FOUR_VALUE: i8 = 127;
 pub const FOUR_STATE: i32 = 10000;
 
 pub static mut counter:u32 = 0;
-static mut tf:[u8; 430467210] = [0; 430467210];
+pub static mut LENGTH: [i8; 65536] = [0; 65536];
+pub const MAX_LENGTH: i8 = 100;
+
+const LONGEST:[i8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
+
 pub fn all () {
   unsafe {
     // This is for benching
@@ -27,485 +34,517 @@ pub fn all () {
     }
 
     println!("COMMENT: BUILDING WON TABLE");
+    println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
     for state in 0..65536 {
       let mut shift = 0;
+      let mut longest = 0;
+
       while shift < 11 {
-        if (state >> shift) & 0b11111 == 0b11111 {
+        let cur = (state >> shift) & 0b11111;
+        if cur == 0b11111 {
+          longest = MAX_LENGTH;
           super::board::WON[state as usize] |= super::board::FIVE_FLAG;
           break;
         }
 
-        // Don't break out of these, because it's possible a five could exist in the same line.
-        else if (state >> shift) & 0b11111 == 0b11110 && shift != 10 {
-          super::board::WON[state as usize] |= super::board::FIVE_FLAG; shift += 5; continue;
-        }
-        else if (state >> shift) & 0b11111 == 0b01111 && shift != 0 {
-          super::board::WON[state as usize] |= super::board::FIVE_FLAG; shift += 5; continue;
-        }/*
-        else if (state >> shift) & 0b11111 == 0b11101 {
-          super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
-        }
-        else if (state >> shift) & 0b11111 == 0b11011 {
-          super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
-        }
-        else if (state >> shift) & 0b11111 == 0b10111 {
-          super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
-        }
-        else if (state >> shift) & 0b11111 == 0b01111 {
-          super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
-        }
-        else if (state >> shift) & 0b11111 == 0b11110{
-          super::board::WON[state as usize] |= super::board::FOUR_FLAG; shift += 5; continue;
-        }*/
-
+        longest = cmp::max(LONGEST[cur as usize], longest);
         shift += 1;
       }
-    }
+      LENGTH[state as usize] = longest;
 
-    // Build the BT Table.
-    println!("COMMENT: BUILDING BINARY - TERNARY TABLE");
-    for state in 0..65536{
       super::board::BT[state as usize] = u32::from_str_radix(&format!("{:b}", state),3).unwrap();
       super::board::BT2[state as usize] = 2 * u32::from_str_radix(&format!("{:b}", state),3).unwrap();
+
     }
 
     // Build the Move and WON Table.
     // We might want to cache this.
     println!("COMMENT: NO CACHE FOUND. GENERATING...");
     let mut threads = vec![];
-    threads.push(thread::spawn( || {
-      binary_recurse(1 << 14,0,13);
+    
+    threads.push(thread::spawn(move  || {
+      let mut Map = HashMap::new();
+      binary_recurse(1 << 14,0,13, &mut Map);
     }));
-    threads.push(thread::spawn(|| {
-      binary_recurse(0,1 << 14,13);
+    threads.push(thread::spawn(move || {
+      let mut Map = HashMap::new();
+      binary_recurse(0,1 << 14,13, &mut Map);
     }));
-    threads.push(thread::spawn(|| {
-      binary_recurse(0,0,13);
+    threads.push(thread::spawn(move || {
+      let mut Map = HashMap::new();
+      binary_recurse(0,0,13, &mut Map);
     }));
 
     for t in threads {
       t.join();
     }
-    super::board::MOVES[0] = [(0,0); 20];
+
+    super::board::MOVES[0] = [[(0,0); 15];2];
   }
 }
 
 
-/**
+/*
  * Recurses through all the places.
  */
-unsafe fn binary_recurse(you: u16, opp: u16, depth: i32) {
+unsafe fn binary_recurse(you: u16, opp: u16, depth: i32,mut map: &mut HashMap<(u16,u16),i8>) {
   // Trim :)
   if (super::board::WON[you as usize] | super::board::WON[opp as usize]) != 0 {
     return;
   }
   if depth < 0 {
     counter += 1;
-    if counter % 1000000 == 0{
-      println!("COMMENT: {:}% FINISHED", (((counter as f32) / 14348907f32) * 100f32).round());
+    if counter % 100000 == 0{
+      println!("COMMENT: {:}% FINISHED", (((counter as f32) / 14348907f32) * 100f32));
     }
     let state: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
-    build_state(you, opp, state as usize);
+    build_state(you, opp, state as usize, map);
     return;
   }
 
 
-  binary_recurse(you | (1 << (depth as u16)), opp, depth - 1);
-  binary_recurse(you, opp | (1 << (depth as u16)), depth - 1);
-  binary_recurse(you, opp, depth - 1);
+  binary_recurse(you | (1 << (depth as u16)), opp, depth - 1, map);
+  binary_recurse(you, opp, depth - 1, map);
+  binary_recurse(you, opp | (1 << (depth as u16)), depth - 1, map);
 }
 
 
-/**
- * Builds WON_TABLE and STATE_TABLE together
- */
-// There are 11 places to check.
-unsafe fn build_state(you: u16, opp: u16, state: usize) {
-  let mut checking_3_y = false;
-  let mut checking_3_o = false;
 
 
-  let mut real_movs: Vec<(u8, i8)> = vec![];
 
-  let mut contains = [16; 15];
-  for i in 0..15 {
-    if ((you >> i) | (opp >> i)) & 1 == 1 {
-      contains[i as usize] = 1u8;
-    }
-  }
-
-  
-
-  let mut i = 0;
-  while i < 15 {
-    let you_state = (you >> i) & 0b11111;
-    let opp_state = (opp >> i) & 0b11111;
-
-
-      // Check for starting fours
-      if you_state == 0b11110 && opp_state == 0 && i <= 10 {
-        super::board::MOVES[state][0] = (i, FOUR_VALUE);
-        super::board::VALUES[0][state] = 100000;
-        super::board::VALUES[1][state] = 100000;
-        return;
-      }
-      if opp_state == 0b11110 && you_state == 0 && i <= 10 {
-        super::board::MOVES[state][0] = (i, -FOUR_VALUE);
-        super::board::VALUES[0][state] = -100000;
-        super::board::VALUES[1][state] = -100000;
-        return;
-      }
-
-      // Check for starting fours
-      if you_state == 0b01111 && opp_state == 0 && i <= 10 {
-        super::board::MOVES[state][0] = (i + 4, FOUR_VALUE);
-        super::board::VALUES[0][state] = 100000;
-        super::board::VALUES[1][state] = 100000;
-        return;
-      }
-      if opp_state == 0b01111 && you_state == 0 && i <= 10 {
-        super::board::MOVES[state][0] = (i + 4, -FOUR_VALUE);
-        super::board::VALUES[0][state] = -100000;
-        super::board::VALUES[1][state] = -100000;
-        return;
-      }
-    /* This is for you */
-    // First check for 3s.
-    if opp_state == 0 && you_state == 0b01110 && i <= 10 {
-      if !(checking_3_y || checking_3_o) {
-        real_movs.truncate(0);
-      }
-      real_movs.push((i, THREE_VALUE));
-      real_movs.push((i+4, THREE_VALUE));
-      checking_3_y = true;
-      i += 5;
-      continue;
-    }
-    /* This is for OPP */
-    // First check for 3s
-    if you_state == 0 && opp_state == 0b01110 && i <= 10 {
-      if !(checking_3_y || checking_3_o) {
-        real_movs.truncate(0);
-      }
-      real_movs.push((i, -THREE_VALUE));
-      real_movs.push((i+4, -THREE_VALUE));
-      checking_3_o = true;
-      i += 5;
-      continue;
-    }
-
-    if !(checking_3_y || checking_3_o) {
-      if (you >> i) & 1 == 1 {
-        let c = get_five(you, opp, i as u8, true);
-        for i in c { real_movs.push(i);}
-      } else if (opp >> i) & 1 == 1 {
-        let c = get_five(you, opp, i as u8, false);
-        for i in c { real_movs.push(i);}  
-      }
-    }
-
-    i += 1;
-  }
-
-  if real_movs.len() == 0 {
+fn build_state (you: u16, opp: u16, state: usize, mut Map: &mut HashMap<(u16,u16),i8>) {
+  if (you|opp) == 0b11111_11111_11111 {
     return;
   }
+  unsafe {
+    let mut mins = get_moves(opp, you, Map);
+    let mut maxs = vec![];//get_moves(you, opp, Map);
 
-  real_movs.sort_by(|a,b| (b.0).cmp(&a.0));
-  
-  let mut you_mov = vec![];
-  let mut value: i32 = 0;
-  let mut i = 0;
-
-  let a = real_movs.into_iter().fold((0,0i8 ), |cur, next| {
-    if cur.0 == next.0{
-      value += cur.1 as i32;
-      return (cur.0, (cur.1.abs() + next.1.abs()));
-    } else {
-      you_mov.push(cur);
-      value += next.1 as i32;
-      return (next.0, next.1.abs());
-    }
-  });
-  you_mov.push(a);
-  you_mov.remove(0);
-  you_mov.sort_by(|a,b| (b.1.abs()).cmp(&a.1.abs()));
-
-  super::board::VALUES[0][state] = value;
-  super::board::VALUES[1][state] = value;
-
-  let mut i = 0;
-  for mov in you_mov {
-    super::board::MOVES[state][i] = mov;
-    i += 1;
-  }
-
-}
-
-unsafe fn get_five (you: u16, opp: u16, i: u8, your_move: bool) -> Vec<(u8, i8)> {
-  let mut movs: Vec<(u8, i8)> = vec![];
-
-  let mut index_right: u8 = 1;
-  let mut index_left: u8 = 1;
-  if your_move {
-    while index_left < 5 {
-      if (i + index_left) > 14 {break;}
-      if (opp >> (i + index_left)) & 1 == 1 {break;}
-      if (you >> (i + index_left)) & 1 == 0 {
-        movs.push((i + index_left, (5 - index_left as i8)));
+    if (mins.len() > 0) {
+        super::board::ENABLED[state][0] = true;
+      if mins.len() < 15 {
+        mins.push((super::board::EOL, 0));
       }
-      index_left += 1;
-    } 
-    if i > 0 {
-      while index_right < 5 {
-        if (i as i8 - index_right as i8) < 0 {break;}
-        if (opp >> (i - index_right)) & 1 == 1 {break;}
-        if (you >> (i - index_right)) & 1 == 0 {
-          movs.push((i - index_right, (5 - index_right as i8)));
-        }
-        index_right += 1;
+      for (index, val) in mins.into_iter().enumerate() {
+        super::board::MOVES[state][0][index] = (val.0, val.1);
       }
     }
-  } else {
-    while index_left < 5 {
-      if (i + index_left) > 14 {break;}
-      if (you >> (i + index_left)) & 1 == 1 {break;}
-      if (opp >> (i + index_left)) & 1 == 0 {
-        movs.push((i + index_left, -(5 - index_left as i8)));
+    if (maxs.len() > 0) {
+        super::board::ENABLED[state][1] = true;
+      if maxs.len() < 15 {
+        maxs.push((super::board::EOL, 0));
       }
-      index_left += 1;
-    }
-    if i > 0 {
-      while index_right < 5 {
-        if (i as i8 - index_right as i8) < 0 {break;}
-        if (you >> (i - index_right)) & 1 == 1 {break;}
-        if (opp >> (i - index_right)) & 1 == 0 {
-          movs.push((i - index_right, -(5 - index_right as i8)));
-        }
-        index_right += 1;
+      for (index, val) in maxs.into_iter().enumerate() {
+        super::board::MOVES[state][1][index] = (val.0, val.1);
       }
     }
   }
-
-
-  return movs;
 }
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+unsafe fn get_moves(you: u16, opp: u16, mut map:  &mut HashMap<(u16,u16),i8>) -> Vec<(u8,i8)> {
+  let taken = you | opp;
+  let mut moves = vec![];
+  for shift in 0..15 {
+    let mov = 1 << shift;
+    if taken & mov != 0 {
+      continue;
+    }
+    let new_you = you | mov;
+    moves.push((shift, length_depth(new_you, opp, 0, map)));
+  }
+  return moves;
+}
+
+unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u16,u16),i8>) -> i8 {
+  let taken = you | opp;
+  if LENGTH[you as usize] == 100 || taken == 0b11111_11111_11111 {
+    return LENGTH[you as usize];
+  }
+
+  let mut max = 10;
+
+  for shift_1 in 0..15 {
+    let you_1 = you | (1 << shift_1);
+    if (you_1 & opp) != 0 {
+      continue;
+    }
+    if LENGTH[you_1 as usize] == 100 {
+      return 18;
+    }
+    if (you_1 | opp) == 0b11111_11111_11111 {
+      continue;
+    }
+    for shift_2 in 0..15 {
+      let you_2 = you_1 | (1 << shift_2);
+      if (you_2 & opp) != 0 {
+        continue;
+      }
+      if LENGTH[you_2 as usize] == 100 {
+        max = cmp::min(2, max);
+      }
+      if (you_2 | opp) == 0b11111_11111_11111 {
+        continue;
+      }
+      for shift_3 in 0..15 {
+        let you_3 = you_2 | (1 << shift_3);
+        if (you_3 & opp) != 0 {
+          continue;
+        }
+        if LENGTH[you_3 as usize] == 100 {
+          max = cmp::min(3, max);
+        }/*
+        if (you_3 | opp) == 0b11111_11111_11111 || (you_3 & opp) != 0 {
+          continue;
+        }
+        for shift_4 in 0..15 {
+          let you_4 = you_3 | (1 << shift_4);
+          if you_4 & opp != 0 {
+            continue;
+          }
+          if LENGTH[you_4 as usize] == 100 {
+            max = cmp::min(4, max);
+          }
+        }*/
+      }
+    }
+  }
+
+  return 2 * (10 - max);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 /*
 
-const LONGEST:[u8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
-const LENGTH:[u8; 32] = [0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5];
+// This is tryna max the move
+unsafe fn opp_maxer (you: u16, opp: u16, mut map: &mut HashMap<(u16, u16, bool), i8>) ->  Vec<(u8, i8)> {
+  let taken = you | opp;
+  let mut moves: Vec<(u8, i8)> = vec![];
+  let mut v = 110;
 
-fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
-  let mut movs: Vec<u8> = vec![];
+  for shift in 0..15 {
+    let mov = 1 << shift;
 
-  for shift in 0..5u16 {
-    if (shift+cur_shift) > 14 {
-      break;
-    }
-    if (binary >> shift) & 1 == 0 {
-      movs.push((shift + cur_shift) as u8); 
-    }
-  }
-
-  let mut value = 0;
-  value = LONGEST[binary as usize];
-
-
-  let mut mov_urg: Vec<(u8, u8, bool)> = vec![];
-
-  for mov in &movs {
-    mov_urg.push((*mov, value, you));
-  }
-
-  return mov_urg;
-}
-
-/**/
-unsafe fn build_state(you: u16, opp: u16, state: usize) {
-  let mut you_movs: Vec<(u8, u8, bool)> = vec![];
-
-  for shift in 0..15u16{
-    let you_state = (you >> shift) & 0b11111;
-    let opp_state = (opp >> shift) & 0b11111;
-
-    if (you_state == 0) && (opp_state == 0) {
+    if (taken & mov) != 0 {
       continue;
     }
-    if you_state == 0 {
-      let five_movs: Vec<(u8,u8, bool)> = get_five(opp_state, shift, true);
-      if LENGTH[opp_state as usize] == 4 {
-        super::board::MOVES[state][0] = (five_movs[0].0, FOUR_VALUE);
-        super::board::VALUES[state] = -FOUR_STATE;
-        return;
-      }
-      let mut five_iter = five_movs.iter();
-      loop {
-        match five_iter.next() {
-          Some (x) => {
-            you_movs.push(*x);
-          }
-          None => {break;}
-        }
-      }
+
+    let val = you_no(you | mov, opp, false, &mut map);
+
+    if val < v {
+      v = val;
     }
-    if opp_state == 0 {
-      let five_movs: Vec<(u8,u8, bool)> = get_five(you_state, shift, false);
-      if LENGTH[you_state as usize] == 4 {
-        super::board::MOVES[state][0] = (five_movs[0].0, FOUR_VALUE);
-        super::board::VALUES[state] = FOUR_STATE;
-        return;
-      }
-      let mut five_iter = five_movs.iter();
-      loop {
-        match five_iter.next() {
-          Some (x) => {
-            you_movs.push(*x);
-          }
-          None => {break;}
-        }
-      }
+    if val == v {
+      moves.push((shift, val));
     }
   }
 
-  let mut total_val = 0i32;
-  you_movs.sort_by(|a,b| (a.1).cmp(&b.1));
-  /*** FINISH HERE!!*/
-  if you_movs.len() == 0 {
-    return;
+  return moves;
+}
+// This is tryna max the move
+unsafe fn you_maxer (you: u16, opp: u16, mut map: &mut HashMap<(u16, u16, bool), i8>) ->  Vec<(u8, i8)> {
+  let taken = you | opp;
+  let mut moves: Vec<(u8, i8)> = vec![];
+  let mut v = -110;
+
+  for shift in 0..15 {
+    let mov = 1 << shift;
+
+    if (taken & mov) != 0 {
+      continue;
+    }
+
+    let val = you_no(you | mov, opp, true, &mut map);
+
+    if val > v {
+      v = val;
+    }
+    if val == v {
+      moves.push((shift, val));
+    }
   }
-  if you_movs[0].1 == 3 {
-    let mut i = 0;
-    for mov in you_movs {
-      if mov.1 < 3 {
-        return;
-      }
-      super::board::MOVES[state][i as usize] = (mov.0, THREE_VALUE);
-      super::board::VALUES[state] += (THREE_VALUE as i32 / 2);
-      i += 1;
-    }
-  } else {
-    you_movs.sort_by(|a,b| (a.0).cmp(&b.0));
 
-    let mut real_movs: Vec<(u8, u8)> = vec![];
-    let mut first = false;
-    let mut cur_mov = (15,15);
-
-    for mov in &you_movs {
-      if mov.0 == cur_mov.0 {
-        cur_mov.1 += mov.1;
-        total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
-      } else {
-        total_val += (if mov.2 {1} else {-1}) * (mov.1 as i32);
-        if first {
-          real_movs.push(cur_mov);
-          cur_mov = (mov.0, mov.1);
-        }else {
-          first = true;
-          cur_mov = (mov.0, mov.1);
-        }
-      }
-    }
-
-    if first {
-      real_movs.push(cur_mov);
-    }
-
-    let mut i:u8 = 0;
-    for mov in &real_movs {
-      super::board::MOVES[state][i as usize] = *mov;
-      i += 1;
-    }
-    super::board::VALUES[state] = total_val;
-  }
+  return moves;
 }
 
-
-/**
- * Accepts a binary, returns a vector of tuples, with moves and urgency.
- */
-
-const LONGEST:[u8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
-const LENGTH:[u8; 32] = [0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5];
-
-fn get_five(binary: u16, cur_shift: u16, you: bool) -> Vec<(u8, u8, bool)>{
-  let mut movs: Vec<u8> = vec![];
-
-  for shift in 0..5u16 {
-    if (shift+cur_shift) > 14 {
-      break;
-    }
-    if (binary >> shift) & 1 == 0 {
-      movs.push((shift + cur_shift) as u8); 
-    }
+// This is tryna find the worst move
+unsafe fn you_no (you: u16, opp: u16, max: bool, mut map: &mut HashMap<(u16, u16, bool), i8>) -> i8 {
+  let taken = you | opp;
+  if LENGTH[opp as usize] == 100 {
+    return -100;
   }
 
-  let mut value = 0;/*
-  match (movs.len() as u8) {
-    1 => {
-      value = 200;
-    },
-    2 => {
-      value = 20;
-    },
-    3 => {
-      value = 5;
+  if taken == 0b11111_11111_11111 {
+    if max {
+      return LENGTH[opp as usize];
+    } else {
+      return -LENGTH[you as usize];
     }
-    4 => {
-      value = 1;
-    }
+  }
+  let mut v = 110;
+
+  match map.get(&(you, opp, max)) {
+    Some(x) => {return *x}
     _ => {}
   }
-  */
-  value = LONGEST[binary as usize];
 
 
-  let mut mov_urg: Vec<(u8, u8, bool)> = vec![];
+  for shift in 0..15 {
+    let mov = 1 << shift;
 
-  for mov in &movs {
-    mov_urg.push((*mov, value, you));
+    if (taken & mov) != 0 {
+      continue;
+    }
+
+    let value = you_yes(you, opp | mov, max, &mut map);
+
+    if value < v {
+      v = value;
+    }
+  }
+  map.insert((you, opp, max), v);
+  return v;
+}
+
+// This is tryna find the best move
+unsafe fn you_yes (you: u16, opp: u16, max: bool, mut map: &mut HashMap<(u16, u16, bool), i8>) -> i8 {
+  let taken = you | opp;
+  if LENGTH[you as usize] == 100 {
+    return 100;
   }
 
-  return mov_urg;
+  if taken == 0b11111_11111_11111 {
+    if max {
+      return LENGTH[you as usize];
+    } else {
+      return -LENGTH[opp as usize];
+    }
+  }
+
+  match map.get(&(you, opp, max)) {
+    Some(x) => {return *x}
+    _ => {}
+  }
+
+  let mut v = -110;
+  for shift in 0..15 {
+    let mov = 1 << shift;
+
+    if (taken & mov) != 0 {
+      continue;
+    }
+
+    let value = you_no(you | mov, opp, max, &mut map);
+
+    if value > v {
+      v = value;
+    }
+  }
+  map.insert((you, opp, max), v);
+  return v;
+}
+*/
+// Traverse one level down, with four loop.
+// Check to see if value CAN increase. If so, head down.
+// Do the same for the opponent.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+unsafe fn minimize (you: u16, opp: u16, mut map: &mut HashMap<(u16, u16, bool),i8>) -> Vec<(u8, i8)> {
+  let taken = you | opp;
+  let mut moves: Vec<(u8, i8)> = vec![];
+
+  for mov in 0..15 {
+    if (taken >> mov) & 1 == 1 {
+      continue;
+    }
+    let new_opp = opp | (1 << mov);
+    let value = minmax(you, new_opp, 1, true, map);
+      moves.push((mov, value));
+    if value >= 0 {
+    }
+  }
+
+  return moves;
+}
+
+unsafe fn maximize (you: u16, opp: u16, mut map: &mut HashMap<(u16, u16, bool),i8>) -> Vec<(u8, i8)> {
+  let taken = you | opp;
+  let mut moves: Vec<(u8, i8)> = vec![];
+
+  for mov in 0..15 {
+    if (taken >> mov) & 1 == 1 {
+      continue;
+    }
+    let new_you = you | (1 << mov);
+    let value = minmax(new_you, opp, 1, false, map);
+      moves.push((mov, value));
+    if value >= 0 {
+    }
+  }
+
+  return moves;
+}
+
+// tuple is in the form of (MOVE, VALUE, DEPTH)
+unsafe fn minmax (you: u16, opp: u16, depth: u8, max: bool, mut map: &mut HashMap<(u16, u16, bool),i8>) -> i8 {
+  if super::board::WON[you as usize] != 0 {
+    map.insert((you, opp, max), 1);
+    return (20-(depth as i8));
+  }
+  if super::board::WON[opp as usize] != 0 {
+    map.insert((you, opp, max), -1);
+    return -(20-(depth as i8));
+  } 
+  let taken = you | opp;
+  if taken == 0b11111_11111_11111 {
+    map.insert((you, opp, max), 0);
+    return 0;
+  }
+
+  if depth >= 8 {
+    return 0;
+  }
+
+  match map.get(&(you, opp, max)) {
+    Some(x) => {return *x;}
+    _ => {}
+  }
+
+
+  if max {
+    let mut v = -200;
+    for mov in 0..15 {
+      if (taken >> mov) & 1 == 1 {
+        continue;
+      }
+      let new_you = you | (1 << mov);
+      let value = minmax(new_you, opp, depth + 1, !max, map);
+      if v < value {
+        v = value;
+      }
+    }
+    map.insert((you,opp,max), v);
+    return v;
+  } else {
+    let mut v = 200;
+    for mov in 0..15 {
+      if (taken >> mov) & 1 == 1 {
+        continue;
+      }
+      let new_opp = opp | (1 << mov);
+      let value = minmax(you, new_opp, depth + 1, !max, map);
+      if v > value {
+        v = value;
+      }
+    }
+    map.insert((you,opp,max), v);
+    return v;
+  }
+
 }
 
 
-*/
 
-    /*
-    
-     FILE READING CODE
-    match File::open("WON_TABLE_CACHE.bin") {
-      Ok(mut won_file) => {
-        println!("COMMENT: CACHES FOUND, READING WON CACHE");
-        let mut move_file = File::open("MOVE_TABLE_CACHE.bin").ok().unwrap();
-        won_file.read(&mut super::board::WON);
-        println!("COMMENT: CACHES FOUND, READING MOVE CACHE");
 
-        unsafe {
-          move_file.read(&mut tf);
-          let mut i = 0;
-          while i < 14348907 {
-            super::board::MOVES[i] = [(tf[i+0],tf[i+1]),(tf[i+2],tf[i+3]),(tf[i+4],tf[i+5]),(tf[i+6],tf[i+7]),(tf[i+8],tf[i+9]),(tf[i+10],tf[i+11]),(tf[i+12],tf[i+13]),(tf[i+14],tf[i+15]),(tf[i+16],tf[i+17]),(tf[i+18],tf[i+19]),(tf[i+20],tf[i+21]),(tf[i+22],tf[i+23]),(tf[i+24],tf[i+25]),(tf[i+26],tf[i+27]),(tf[28],tf[29])];
-            i += 30;
-          }
-        }
-      }
-      Err(e) => {
-        println!("COMMENT: NO CACHE FOUND. GENERATING...");
-        binary_recurse(0,0,14);
-        println!("COMMENT: FINISHED GENERATING, WRITING FILES.");
 
-        //let mut won_file = File::create("WON_TABLE_CACHE.bin").ok().unwrap();
-        //won_file.write(&super::board::WON);
-        let mut move_file = File::create("MOVE_TABLE_CACHE.bin").ok().unwrap();
 
-        unsafe {
-          let c = std::mem::transmute::<&[[(u8,u8); 15]; 14348907], &[u8; 430467210]>(&super::board::MOVES);
-          move_file.write(c);
-        }
-      }
-    }
-    */
+
+
+
+
+
+
+
+
+
+ */

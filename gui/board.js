@@ -38,7 +38,45 @@ Board.clear = ()  => {
     i.value = ''
   })
 }
-Board.toString = function () {
 
-}
-var to = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
