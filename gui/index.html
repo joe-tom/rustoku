@@ -29,6 +29,7 @@
       <div class="block" v-for="(square, index) in squares" v-bind:class="{done: square.evaluated}" @click="activate(square)">
         <div class="block__label">{{square.value}}</div>
         <div class="piece" v-bind:class="{black: square.black, white: square.white}" v-show="square.active"></div>
+        <div class="glowing" v-if="square.evaluating"></div>
       </div>
     </div>
     <div id="control__wrap">

@@ -60,13 +60,14 @@ use std::string::String;
  */
 fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map: &mut HashMap<String, (u8,i32)>) -> Vec<(u8, i32)> {
   let mut moves = brd.gen_moves(true);
-  let mut values = vec![];
+  //let mut values = vec![];
 
 
   let mut alpha = a;
   let mut beta = b;
 
   let mut v = -1;
+  /*
   for mov in moves {
     brd.place_piece(mov.0 as usize, max);
     let d_val = (minimax(brd, depth + 1, !max, alpha, beta, map));
@@ -91,6 +92,8 @@ fn next_best (brd: &mut board::Board, depth: u8, max: bool, a: i32, b: i32, map:
   } else {
     return values;
   }
+  */
+ return vec![(0,1)];
 }
 
 /**

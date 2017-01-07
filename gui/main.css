@@ -168,15 +168,30 @@ body{
 
 
 
+.glowing{
+  height: 5px;
+  width: 5px;
+  border-radius: 10px;
+  margin: 17.5px;
+  animation-duration: 1s;
+  animation-name: pulse;
+  animation-iteration-count: infinite;
+}
 
 
 
 
-
-
-
-
-
+@keyframes pulse {
+  0% {
+    background-color: #D91E18;
+  }
+  50% {
+    background-color: #F89406;
+  }
+  100% {
+    background-color: #D91E18;
+  }
+}
 
 
 

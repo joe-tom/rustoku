@@ -43,6 +43,10 @@ function parse(data) {
         Board.activate(Board.$data.squares[JSON.parse(arr)[0][0]], true)
       },10)
     break
+    case 'DOING':
+      var arr = JSON.parse(things[1].replace(/\(/g,'[').replace(/\)/g,']'))
+      Board.$data.squares[arr[0]].evaluating = true
+    break
     case 'DONE':
       console.log(data)
       var arr = JSON.parse(things[1].replace(/\(/g,'[').replace(/\)/g,']'))
@@ -56,6 +60,7 @@ function parse(data) {
       JSON.parse(arr).filter(tup => tup[1] != 0).forEach((i) => {
         Board.$data.squares[i[0]].value = i[1]
         Board.$data.squares[i[0]].evaluated = false        
+        Board.$data.squares[i[0]].evaluating = false
       })
       console.log(arr)
     break

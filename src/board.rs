@@ -4,13 +4,18 @@ pub static mut BT2: [u32; 65536] = [0; 65536];
 
 // The arrays for move lookup
 pub static mut MOVES: [[[(u8,i8); 15]; 2]; 14348907] = [[[(0,0); 15]; 2]; 14348907];
-pub static mut VALUES: [[i32; 14348907]; 2] = [[0; 14348907]; 2];
 
+pub static mut MAX_MOVES: [[(u8,i8); 15]; 14348907] = [[(0,0); 15]; 14348907];
+pub static mut MIN_MOVES: [[(u8,i8); 15]; 14348907] = [[(0,0); 15]; 14348907];
+
+pub static mut VALUES: [[i32; 14348907]; 2] = [[0; 14348907]; 2];
 // The array for win lookup
 pub static mut WON: [u8; 65536] = [0; 65536]; 
 
 // To see if this even has moves
 pub static mut ENABLED: [[bool; 2]; 14348907] = [[false; 2]; 14348907];
+pub static mut MAX_ENABLED: [bool; 14348907] = [false; 14348907];
+pub static mut MIN_ENABLED: [bool; 14348907] = [false; 14348907];
 
 // List of constants
 pub const FIVE_FLAG: u8 = 0b100_0000_0000;

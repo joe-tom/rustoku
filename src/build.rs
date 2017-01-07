@@ -97,8 +97,7 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32,mut map: &mut HashMap<(u
     if counter % 100000 == 0{
       println!("COMMENT: {:}% FINISHED", (((counter as f32) / 14348907f32) * 100f32));
     }
-    let state: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
-    build_state(you, opp, state as usize, map);
+    build_state(you, opp, map);
     return;
   }
 
@@ -112,30 +111,28 @@ unsafe fn binary_recurse(you: u16, opp: u16, depth: i32,mut map: &mut HashMap<(u
 
 
 
-fn build_state (you: u16, opp: u16, state: usize, mut Map: &mut HashMap<(u16,u16),i8>) {
+fn build_state (you: u16, opp: u16, mut Map: &mut HashMap<(u16,u16),i8>) {
   if (you|opp) == 0b11111_11111_11111 {
     return;
   }
   unsafe {
     let mut mins = get_moves(opp, you, Map);
-    let mut maxs = vec![];//get_moves(you, opp, Map);
-
+    min.sort_by(|a,b| b.cmp(&a));
+    
     if (mins.len() > 0) {
-        super::board::ENABLED[state][0] = true;
-      if mins.len() < 15 {
-        mins.push((super::board::EOL, 0));
-      }
+      let state_min: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
+      let state_max: usize = ((2 * (super::board::BT[you as usize] as u32)) + (super::board::BT[opp as usize] as u32)) as usize;
+
+      super::board::MIN_ENABLED[state_min] = true;
+      super::board::MAX_ENABLED[state_max] = true;
       for (index, val) in mins.into_iter().enumerate() {
-        super::board::MOVES[state][0][index] = (val.0, val.1);
-      }
-    }
-    if (maxs.len() > 0) {
-        super::board::ENABLED[state][1] = true;
-      if maxs.len() < 15 {
-        maxs.push((super::board::EOL, 0));
-      }
-      for (index, val) in maxs.into_iter().enumerate() {
-        super::board::MOVES[state][1][index] = (val.0, val.1);
+        if val.1 == 0 {
+          super::board::MIN_MOVES[state_min][index] = (super::board::EOL, 0);
+          super::board::MAX_MOVES[state_max][index] = (super::board::EOL, 0);
+          return;
+        }
+        super::board::MIN_MOVES[state_min][index] = (val.0, -val.1);
+        super::board::MAX_MOVES[state_max][index] = (val.0, val.1);
       }
     }
   }
@@ -163,7 +160,10 @@ unsafe fn get_moves(you: u16, opp: u16, mut map:  &mut HashMap<(u16,u16),i8>) ->
       continue;
     }
     let new_you = you | mov;
-    moves.push((shift, length_depth(new_you, opp, 0, map)));
+    let val = length_depth(new_you, opp, 0, map);
+    if val != 0 {
+      moves.push((shift, val));
+    }
   }
   return moves;
 }
@@ -171,7 +171,7 @@ unsafe fn get_moves(you: u16, opp: u16, mut map:  &mut HashMap<(u16,u16),i8>) ->
 unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u16,u16),i8>) -> i8 {
   let taken = you | opp;
   if LENGTH[you as usize] == 100 || taken == 0b11111_11111_11111 {
-    return LENGTH[you as usize];
+    return 1;
   }
 
   let mut max = 10;
@@ -182,7 +182,7 @@ unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u
       continue;
     }
     if LENGTH[you_1 as usize] == 100 {
-      return 18;
+      return 2;
     }
     if (you_1 | opp) == 0b11111_11111_11111 {
       continue;
@@ -193,7 +193,7 @@ unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u
         continue;
       }
       if LENGTH[you_2 as usize] == 100 {
-        max = cmp::min(2, max);
+        max = cmp::min(3, max);
       }
       if (you_2 | opp) == 0b11111_11111_11111 {
         continue;
@@ -204,7 +204,7 @@ unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u
           continue;
         }
         if LENGTH[you_3 as usize] == 100 {
-          max = cmp::min(3, max);
+          max = cmp::min(4, max);
         }/*
         if (you_3 | opp) == 0b11111_11111_11111 || (you_3 & opp) != 0 {
           continue;
@@ -221,8 +221,10 @@ unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u
       }
     }
   }
-
-  return 2 * (10 - max);
+  if max == 10 {
+    return 0;
+  }
+  return max;
 }
 
 
