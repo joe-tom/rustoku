@@ -26,6 +26,7 @@ pub const MAX_LENGTH: i8 = 100;
 
 const LONGEST:[i8; 32] = [0,1,1,2,1,1,2,3,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,2,2,2,2,3,3,4,5];
 
+
 pub fn all () {
   unsafe {
     // This is for benching
@@ -79,7 +80,8 @@ pub fn all () {
       t.join();
     }
 
-    super::board::MOVES[0] = [[(0,0); 15];2];
+    super::board::MAX_MOVES[0] = [(0,0); 15];
+    super::board::MIN_MOVES[0] = [(0,0); 15];
   }
 }
 
@@ -128,26 +130,18 @@ fn build_state (you: u16, opp: u16, mut Map: &mut HashMap<(u16,u16),i8>) {
       super::board::MIN_ENABLED[state_min] = true;
       super::board::MAX_ENABLED[state_max] = true;
 
-      let mut cur = mins[0];
-      let mut index = 1;
+      let mut index = 0;
 
       while index < length {
-        let val = mins[index];
+        let cur = mins[index];
 
-        if cur.0 == val.0 {
-          cur.1 = cmp::min(val.1, cur.1);
-        } else {
-          super::board::MIN_MOVES[state_min][index] = (cur.0, -cur.1);
-          super::board::MAX_MOVES[state_max][index] = (cur.0, cur.1);
-          cur = val;
-        }
+        super::board::MIN_MOVES[state_min][index] = (cur.0, cur.1);
+        super::board::MAX_MOVES[state_max][index] = (cur.0, cur.1);
 
+        super::board::VALUES[state_max] += super::board::MAX_VALS[cur.1 as usize] as i32;
+        super::board::VALUES[state_min] += super::board::MIN_VALS[cur.1 as usize] as i32;
         index += 1;
       }
-
-      super::board::MIN_MOVES[state_min][index] = (cur.0, -cur.1);
-      super::board::MAX_MOVES[state_max][index] = (cur.0, cur.1);
-
       if index < 15 {
         super::board::MIN_MOVES[state_min][index] = (super::board::EOL, 0);
         super::board::MAX_MOVES[state_max][index] = (super::board::EOL, 0);
@@ -169,7 +163,7 @@ fn build_state (you: u16, opp: u16, mut Map: &mut HashMap<(u16,u16),i8>) {
 
 
 
-unsafe fn get_moves(you: u16, opp: u16, mut map:  &mut HashMap<(u16,u16),i8>) -> Vec<(u8,i8)> {
+unsafe fn get_moves(you: u16, opp: u16, mut map:  &mut HashMap<(u16,u16),i8>) -> Vec<(u8,u8)> {
   let taken = you | opp;
   let mut moves = vec![];
   for shift in 0..15 {
@@ -186,7 +180,7 @@ unsafe fn get_moves(you: u16, opp: u16, mut map:  &mut HashMap<(u16,u16),i8>) ->
   return moves;
 }
 
-unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u16,u16),i8>) -> i8 {
+unsafe fn length_depth (you: u16, opp: u16, depth: u8, mut map:  &mut HashMap<(u16,u16),i8>) -> u8 {
   let taken = you | opp;
   if LENGTH[you as usize] == 100 || taken == 0b11111_11111_11111 {
     return 1;

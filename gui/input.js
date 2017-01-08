@@ -36,7 +36,7 @@ function parse(data) {
       Board.$data.squares.forEach((sq) => {
         sq.value = ''
       })
-      JSON.parse(arr).filter(tup => tup[1] != 0).forEach((i) => {
+      JSON.parse(arr).filter(tup => tup[1] != 0).sort((a,b)=> a[1] - a[1]).forEach((i) => {
         Board.$data.squares[i[0]].value = i[1]
       })
       setTimeout(() => {

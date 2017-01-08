@@ -3,12 +3,11 @@ pub static mut BT: [u32; 65536] = [0; 65536];
 pub static mut BT2: [u32; 65536] = [0; 65536];
 
 // The arrays for move lookup
-pub static mut MOVES: [[[(u8,i8); 15]; 2]; 14348907] = [[[(0,0); 15]; 2]; 14348907];
+pub static mut MAX_MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
+pub static mut MIN_MOVES: [[(u8,u8); 15]; 14348907] = [[(0,0); 15]; 14348907];
 
-pub static mut MAX_MOVES: [[(u8,i8); 15]; 14348907] = [[(0,0); 15]; 14348907];
-pub static mut MIN_MOVES: [[(u8,i8); 15]; 14348907] = [[(0,0); 15]; 14348907];
+pub static mut VALUES: [i32; 14348907] = [0; 14348907]; 
 
-pub static mut VALUES: [[i32; 14348907]; 2] = [[0; 14348907]; 2];
 // The array for win lookup
 pub static mut WON: [u8; 65536] = [0; 65536]; 
 
@@ -26,6 +25,17 @@ pub const OPP_WON: i32 = -20000;
 
 pub const EOL:u8 = 128;
 
+//This is the most important array in the entire game.
+// Array positions:
+// 0: This is useless. Value can be none
+// 1: This means this square completes a 5. Most important!
+// 2: This means that this square creates a 4. Not as important as the last one, but still, important.
+// 3: This square creates a 3. Not as important, but a little important.
+// 4: This square creates a 2.
+pub const MAX_VALS: [i16; 5] = [0,1000,100,40,10];
+pub const MIN_VALS: [i16; 5] = [0,-1000,-100,-40,-10];
+
+// The board in its current state
 pub struct Board {
   pub multi: [char; 225],
 
@@ -202,14 +212,14 @@ pub static DIAGR_ARRS:[[u8; 15]; 21] = [
 ];
 
 impl Board {
-  pub fn evaluate (&self, you: bool) -> i32 {
+  pub fn evaluate (&self) -> i32 {
     let mut value = 0;
     unsafe {
       for i in 0..21usize {
-        value += VALUES[0][((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize];
-        value += VALUES[0][((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize];
-        value += VALUES[0][((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize];
-        value += VALUES[0][((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize];
+        value += VALUES[((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize];
       }
     }
 
@@ -218,8 +228,6 @@ impl Board {
 
   pub fn won (&self, you: bool) -> i32 {
     unsafe {
-      let mut four_count = 0;
-
       if you {
         for i in 0..21usize {
           let val_y = (WON[self.verti_y[i] as usize] | WON[self.horiz_y[i] as usize] | WON[self.diagr_y[i] as usize] | WON[self.diagl_y[i] as usize]);
@@ -228,15 +236,6 @@ impl Board {
           // Check for five
           if val_y & FIVE_FLAG != 0 { return YOU_WON;}
           if val_o & FIVE_FLAG != 0 { return OPP_WON;}
-          // These are move specific now ---
-          // Check for fours
-          /* THIS ONLY WORKS IF WE KNOW THE OTHER SIDE.
-          if val_y & FOUR_FLAG != 0 { return YOU_WON;}
-          if val_o & FOUR_FLAG != 0 { four_count += 1;}*/
-        }
-
-        if four_count > 1 {
-          return OPP_WON;
         }
       } else {
         for i in 0..21usize {
@@ -246,15 +245,6 @@ impl Board {
           // Check for five
           if val_y & FIVE_FLAG != 0 { return YOU_WON;}
           if val_o & FIVE_FLAG != 0 { return OPP_WON;}
-          // These are move specific now ---
-          // Check for fours
-          /* THIS ONLY WORKS IF WE KNOW THE OTHER SIDE.
-          if val_o & FOUR_FLAG != 0 { return OPP_WON;}
-          if val_y & FOUR_FLAG != 0 { four_count += 1;}*/
-        }
-
-        if four_count > 1 {
-          return YOU_WON;
         }
       }
     }
@@ -263,7 +253,7 @@ impl Board {
 
   pub fn gen_moves (&mut self, max: bool) ->  Vec<(u8, i16)>{
       
-    let mut movs: Vec<(u8, i8)> = vec![];
+    let mut movs: Vec<(u8, u8)> = vec![];
     let mut i = 0;
 
 
@@ -399,9 +389,41 @@ impl Board {
 
       }
     }
-    println!("{:?}", movs);
-    movs.sort_by(|a,b| b.cmp(&a));
-    return movs.into_iter().filter(|x| x.1 != 0).map(|x| (x.0, x.1 as i16)).collect();
+
+    let _NEG = if max {1} else {-1};
+    let _LEN = movs.len();
+
+    if _LEN == 0 {
+      return vec![(0,0)];
+    }
+    if _LEN == 1 {
+      return vec![(movs[0].0, _NEG * MAX_VALS[movs[0].1 as usize])];
+    }
+
+    movs.sort_by(|a,b| (b.0).cmp(&a.0));
+
+
+    let mut good_moves = vec![];
+    let mut cur = (movs[0].0, _NEG * MAX_VALS[movs[0].1 as usize]);
+    let mut index = 1;
+
+    while index < _LEN {
+      let mov = movs[index];
+
+      if mov.0 == cur.0 {
+        cur.1 += (_NEG * MAX_VALS[mov.1 as usize])
+      } else {
+        good_moves.push(cur);
+        cur = (mov.0, (_NEG * MAX_VALS[mov.1 as usize]));
+      }
+
+      index += 1;
+    }
+    good_moves.push(cur);
+
+    good_moves.sort_by(|a,b| (b.1).cmp(&a.1));
+    
+    return good_moves;
   }
 
   pub fn place_piece (&mut self, place: usize, you: bool) {
