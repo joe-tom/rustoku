@@ -117,22 +117,40 @@ fn build_state (you: u16, opp: u16, mut Map: &mut HashMap<(u16,u16),i8>) {
   }
   unsafe {
     let mut mins = get_moves(opp, you, Map);
-    min.sort_by(|a,b| b.cmp(&a));
-    
-    if (mins.len() > 0) {
-      let state_min: u32 = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32));
-      let state_max: usize = ((2 * (super::board::BT[you as usize] as u32)) + (super::board::BT[opp as usize] as u32)) as usize;
+    let length = mins.len();
+
+    if length > 0 {
+      mins.sort_by(|a,b| b.0.cmp(&a.0));
+
+      let state_max: usize = ((2 * (super::board::BT[opp as usize] as u32)) + (super::board::BT[you as usize] as u32)) as usize;
+      let state_min: usize = ((super::board::BT[opp as usize] as u32) + (2 * (super::board::BT[you as usize] as u32))) as usize;
 
       super::board::MIN_ENABLED[state_min] = true;
       super::board::MAX_ENABLED[state_max] = true;
-      for (index, val) in mins.into_iter().enumerate() {
-        if val.1 == 0 {
-          super::board::MIN_MOVES[state_min][index] = (super::board::EOL, 0);
-          super::board::MAX_MOVES[state_max][index] = (super::board::EOL, 0);
-          return;
+
+      let mut cur = mins[0];
+      let mut index = 1;
+
+      while index < length {
+        let val = mins[index];
+
+        if cur.0 == val.0 {
+          cur.1 = cmp::min(val.1, cur.1);
+        } else {
+          super::board::MIN_MOVES[state_min][index] = (cur.0, -cur.1);
+          super::board::MAX_MOVES[state_max][index] = (cur.0, cur.1);
+          cur = val;
         }
-        super::board::MIN_MOVES[state_min][index] = (val.0, -val.1);
-        super::board::MAX_MOVES[state_max][index] = (val.0, val.1);
+
+        index += 1;
+      }
+
+      super::board::MIN_MOVES[state_min][index] = (cur.0, -cur.1);
+      super::board::MAX_MOVES[state_max][index] = (cur.0, cur.1);
+
+      if index < 15 {
+        super::board::MIN_MOVES[state_min][index] = (super::board::EOL, 0);
+        super::board::MAX_MOVES[state_max][index] = (super::board::EOL, 0);
       }
     }
   }

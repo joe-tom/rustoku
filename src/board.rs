@@ -230,8 +230,9 @@ impl Board {
           if val_o & FIVE_FLAG != 0 { return OPP_WON;}
           // These are move specific now ---
           // Check for fours
+          /* THIS ONLY WORKS IF WE KNOW THE OTHER SIDE.
           if val_y & FOUR_FLAG != 0 { return YOU_WON;}
-          if val_o & FOUR_FLAG != 0 { four_count += 1;}
+          if val_o & FOUR_FLAG != 0 { four_count += 1;}*/
         }
 
         if four_count > 1 {
@@ -247,8 +248,9 @@ impl Board {
           if val_o & FIVE_FLAG != 0 { return OPP_WON;}
           // These are move specific now ---
           // Check for fours
+          /* THIS ONLY WORKS IF WE KNOW THE OTHER SIDE.
           if val_o & FOUR_FLAG != 0 { return OPP_WON;}
-          if val_y & FOUR_FLAG != 0 { four_count += 1;}
+          if val_y & FOUR_FLAG != 0 { four_count += 1;}*/
         }
 
         if four_count > 1 {
@@ -264,72 +266,137 @@ impl Board {
     let mut movs: Vec<(u8, i8)> = vec![];
     let mut i = 0;
 
-    let TURN = if max {1} else {0};
 
     unsafe {
-      loop {
-        if i >= 21 {
-          break;
-        }
-        let mut l_val = ((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize;
-        let mut r_val = ((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize;
-        let mut l_more = ENABLED[l_val][TURN];
-        let mut r_more = ENABLED[r_val][TURN];
-        let mut l_state = MOVES[l_val][TURN].iter();
-        let mut r_state = MOVES[r_val][TURN].iter();
+      if max {
+        // THIS IS FOR MAX MOVES
+        loop {
+          if i >= 21 {
+            break;
+          }
+          let mut l_val = ((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize;
+          let mut r_val = ((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize;
+          let mut l_more = MAX_ENABLED[l_val];
+          let mut r_more = MAX_ENABLED[r_val];
+          let mut l_state = MAX_MOVES[l_val].iter();
+          let mut r_state = MAX_MOVES[r_val].iter();
 
 
-        if i < 15 {
-          let mut v_val = ((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize;
-          let mut h_val = ((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize;
-          let mut v_more = ENABLED[v_val][TURN];
-          let mut h_more = ENABLED[h_val][TURN];
-          let mut v_state = MOVES[v_val][TURN].iter();
-          let mut h_state = MOVES[h_val][TURN].iter();
+          if i < 15 {
+            let mut v_val = ((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize;
+            let mut h_val = ((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize;
+            let mut v_more = MAX_ENABLED[v_val];
+            let mut h_more = MAX_ENABLED[h_val];
+            let mut v_state = MAX_MOVES[v_val].iter();
+            let mut h_state = MAX_MOVES[h_val].iter();
 
-          while v_more || h_more || l_more || r_more {
-            if v_more {
-              if let Some(v_val) = v_state.next() {
-                if v_val.0 == EOL { v_more = false; } else { movs.push((VERTI_ARRS[i][14 - v_val.0 as usize], v_val.1)); }
-              } else { v_more = false; }
+            while v_more || h_more || l_more || r_more {
+              if v_more {
+                if let Some(v_val) = v_state.next() {
+                  if v_val.0 == EOL { v_more = false; } else { movs.push((VERTI_ARRS[i][14 - v_val.0 as usize], v_val.1)); }
+                } else { v_more = false; }
+              }
+              if h_more {
+                if let Some(h_val) = h_state.next() {
+                  if h_val.0 == EOL { h_more = false; } else { movs.push((HORIZ_ARRS[i][14 - h_val.0 as usize], h_val.1)); }
+                } else { h_more = false; }
+              }
+              if l_more {
+                if let Some(l_val) = l_state.next() {
+                  let row = &DIAGL_ARRS[i];
+                  if l_val.0 == EOL { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
+                } else { l_more = false; }
+              }
+              if r_more {
+                if let Some(r_val) = r_state.next() {
+                  let row = &DIAGR_ARRS[i];
+                  if r_val.0 == EOL { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
+                } else { r_more = false; }
+              }
             }
-            if h_more {
-              if let Some(h_val) = h_state.next() {
-                if h_val.0 == EOL { h_more = false; } else { movs.push((HORIZ_ARRS[i][14 - h_val.0 as usize], h_val.1)); }
-              } else { h_more = false; }
-            }
-            if l_more {
-              if let Some(l_val) = l_state.next() {
-                let row = &DIAGL_ARRS[i];
-                if l_val.0 == EOL { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
-              } else { l_more = false; }
-            }
-            if r_more {
-              if let Some(r_val) = r_state.next() {
-                let row = &DIAGR_ARRS[i];
-                if r_val.0 == EOL { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
-              } else { r_more = false; }
+          } else {
+            while l_more || r_more {
+              if l_more {
+                if let Some(l_val) = l_state.next() {
+                  let row = &DIAGL_ARRS[i];
+                  if l_val.0 == EOL { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
+                } else { l_more = false; }
+              }
+              if r_more {
+                if let Some(r_val) = r_state.next() {
+                  let row = &DIAGR_ARRS[i];
+                  if r_val.0 == EOL { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
+                } else { r_more = false; }
+              }
             }
           }
-        } else {
-          while l_more || r_more {
-            if l_more {
-              if let Some(l_val) = l_state.next() {
-                let row = &DIAGL_ARRS[i];
-                if l_val.0 == EOL { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
-              } else { l_more = false; }
+          i += 1;
+        }
+      } else {
+        // THIS IS FOR MINMOVES
+        loop {
+          if i >= 21 {
+            break;
+          }
+          let mut l_val = ((BT2[self.diagl_o[i] as usize]) + BT[self.diagl_y[i] as usize]) as usize;
+          let mut r_val = ((BT2[self.diagr_o[i] as usize]) + BT[self.diagr_y[i] as usize]) as usize;
+          let mut l_more = MIN_ENABLED[l_val];
+          let mut r_more = MIN_ENABLED[r_val];
+          let mut l_state = MIN_MOVES[l_val].iter();
+          let mut r_state = MIN_MOVES[r_val].iter();
+
+
+          if i < 15 {
+            let mut v_val = ((BT2[self.verti_o[i] as usize]) + BT[self.verti_y[i] as usize]) as usize;
+            let mut h_val = ((BT2[self.horiz_o[i] as usize]) + BT[self.horiz_y[i] as usize]) as usize;
+            let mut v_more = MIN_ENABLED[v_val];
+            let mut h_more = MIN_ENABLED[h_val];
+            let mut v_state = MIN_MOVES[v_val].iter();
+            let mut h_state = MIN_MOVES[h_val].iter();
+
+            while v_more || h_more || l_more || r_more {
+              if v_more {
+                if let Some(v_val) = v_state.next() {
+                  if v_val.0 == EOL { v_more = false; } else { movs.push((VERTI_ARRS[i][14 - v_val.0 as usize], v_val.1)); }
+                } else { v_more = false; }
+              }
+              if h_more {
+                if let Some(h_val) = h_state.next() {
+                  if h_val.0 == EOL { h_more = false; } else { movs.push((HORIZ_ARRS[i][14 - h_val.0 as usize], h_val.1)); }
+                } else { h_more = false; }
+              }
+              if l_more {
+                if let Some(l_val) = l_state.next() {
+                  let row = &DIAGL_ARRS[i];
+                  if l_val.0 == EOL { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
+                } else { l_more = false; }
+              }
+              if r_more {
+                if let Some(r_val) = r_state.next() {
+                  let row = &DIAGR_ARRS[i];
+                  if r_val.0 == EOL { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
+                } else { r_more = false; }
+              }
             }
-            if r_more {
-              if let Some(r_val) = r_state.next() {
-                let row = &DIAGR_ARRS[i];
-                if r_val.0 == EOL { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
-              } else { r_more = false; }
+          } else {
+            while l_more || r_more {
+              if l_more {
+                if let Some(l_val) = l_state.next() {
+                  let row = &DIAGL_ARRS[i];
+                  if l_val.0 == EOL { l_more = false; } else { if row[l_val.0 as usize] != NIL { movs.push((row[l_val.0 as usize], l_val.1)); } }
+                } else { l_more = false; }
+              }
+              if r_more {
+                if let Some(r_val) = r_state.next() {
+                  let row = &DIAGR_ARRS[i];
+                  if r_val.0 == EOL { r_more = false; } else { if row[r_val.0 as usize] != NIL { movs.push((row[r_val.0 as usize], r_val.1)); } }
+                } else { r_more = false; }
+              }
             }
           }
+          i += 1;
         }
 
-
-        i += 1;
       }
     }
     println!("{:?}", movs);
