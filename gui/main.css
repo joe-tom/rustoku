@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
 body{
-  background-color: #6C7A89;
+  background-color: #1E8BC3;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -126,17 +126,18 @@ body{
 #gomoku__loading{
   height: 100%;
   width: 100%;
-  background-color: #6C7A89;
+  background-color: #1E8BC3;
   position: absolute;
   top: 0px;
   left: 0px;
   z-index: 100000;
+  pointer-events: none;
 }
   .loading__title{
     font-family: Raleway;
     font-size: 30px;
     font-weight: 400;
-    color: #999;
+    color: #EEE;
     width: 100%;
     margin-top: 200px;
     text-align: center;
